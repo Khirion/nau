@@ -1,5 +1,5 @@
-#ifndef PASSGEOMETRY_HPP
-#define PASSGEOMETRY_HPP
+#ifndef PASSLIGHTNING_HPP
+#define PASSLIGHTNING_HPP
 
 #include <vector>
 
@@ -42,4 +42,4 @@ extern "C" {
 #endif	
 }
 
-#endif //PASSGEOMETRY_HPP
+#endif //PASSLIGHTNING_HPP

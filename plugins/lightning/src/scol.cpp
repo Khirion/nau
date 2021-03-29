@@ -12,6 +12,7 @@ bool scol::grow(){
         if (n != tree.end() && n->scan) {
             n->grow = true;
             n->dir += glm::normalize((c.pos - n->pos) * (c.attStrength / glm::distance(c.pos, n->pos)));
+            n->dir += glm::normalize((floor.pos - n->pos) * (floor.attStrength / glm::distance(floor.pos, n->pos)));
             n->dir = glm::normalize(n->dir);
         }
     }
@@ -30,17 +31,14 @@ bool scol::grow(){
             node child = node(curNode.pos, curNode.pos + (curNode.dir * curNode.growthLength), glm::normalize(curNode.dir * randDir()), true, true);
 
             // Ground Check
-            if (child.pos.y <= 0){
-                child.pos.y = 0;
+            if (child.pos.y <= 0)
                 end = true;
+            else {
+                checkDeletion(child);
+                tree.push_back(child);
             }
-
-            // Add to tree
-            tree.push_back(child);
-            checkDeletion(child);
         }
     }
-
     return end;
 }
 

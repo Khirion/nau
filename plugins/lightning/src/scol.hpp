@@ -21,10 +21,10 @@ struct node{
     bool grow;
 
     node(): // Root
-        parent(glm::vec3(0,150,0)),
-        pos(glm::vec3(0,150,0)),
+        parent(glm::vec3(0,15,0)),
+        pos(glm::vec3(0,15,0)),
         dir(glm::vec3(0,-1, 0)),
-        growthLength(5),
+        growthLength(0.5),
         scan(true),
         grow(true) {};
 
@@ -53,15 +53,15 @@ struct charge{
     charge():
         pos(glm::vec3(0,0,0)),
         closestNode(FLT_MAX, FLT_MAX, FLT_MAX),
-        attStrength(0.5),
+        attStrength(5.0),
         attDistance(0.0),
         killDistance(1.0) {};
 
     charge(glm::vec3 _pos):
         pos(_pos),
         closestNode(FLT_MAX, FLT_MAX, FLT_MAX),
-        attStrength(1.0),
-        attDistance(10.0),
+        attStrength(0.5),
+        attDistance(5.0),
         killDistance(1.0) {};
 
     ~charge() {}
@@ -85,14 +85,14 @@ class scol{
             charges = list<charge>();
 
             default_random_engine generator;
-            normal_distribution<float> distribution(75.0, 25.0);
-            normal_distribution<float> dist(2.5, 1.0);
+            normal_distribution<float> distribution(7.5, 5);
+            normal_distribution<float> dist(0, 2.5);
 
 
             auto rolly = bind(distribution, generator);
             auto rollxz = bind(dist, generator);
 
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
                 charges.push_back(charge(glm::vec3(rollxz(), rolly(), rollxz())));
             }
 
