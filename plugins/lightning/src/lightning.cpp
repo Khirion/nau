@@ -18,7 +18,7 @@
 #include <Windows.h>
 #endif
 
-static char className[] = "geometryPI";
+static char className[] = "lightningPI";
 
 #ifdef WIN32
 #define EXPORT __declspec(dllexport)
@@ -85,6 +85,7 @@ PassLightning::prepareGeometry() {
 
 	// create a renderable
 	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->createRenderable("Mesh", "lightning");
+	m_Renderable->setDrawingPrimitive(nau::render::IRenderable::LINES);
 
 	// fill in vertex array
 	vector<glm::vec3> vaux = sCol.getVertices();
@@ -108,7 +109,7 @@ PassLightning::prepareGeometry() {
 	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(iaux);
 
 	// create the material group
-	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Light Grey");
+	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Emission Blue");
 	aMaterialGroup->setIndexList(indices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
