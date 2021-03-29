@@ -120,7 +120,7 @@ endif(WIN32)
 
 add_subdirectory(nau)
 add_subdirectory(plugins/passDepthMap)
-
+add_subdirectory(plugins/lightning)
 add_subdirectory(plugins/passGeometry)
 
 if (WIN32)
