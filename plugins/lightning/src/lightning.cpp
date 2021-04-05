@@ -148,7 +148,7 @@ PassLightning::restore(void) {
 
 void
 PassLightning::doPass(void) {
-
+	RENDERMANAGER->clearQueue();
 	std::vector<std::string>::iterator scenesIter;
 	scenesIter = m_SceneVector.begin();
 

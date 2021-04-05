@@ -155,7 +155,7 @@ PassGeometry::restore (void) {
 
 void 
 PassGeometry::doPass (void) {
-
+	RENDERMANAGER->clearQueue();
 	std::vector<std::string>::iterator scenesIter;
 	scenesIter = m_SceneVector.begin();
 

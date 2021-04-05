@@ -21,10 +21,10 @@ struct node{
     bool grow;
 
     node(): // Root
-        parent(glm::vec3(0,15,0)),
-        pos(glm::vec3(0,15,0)),
+        parent(glm::vec3(0,1500,0)),
+        pos(glm::vec3(0,1500,0)),
         dir(glm::vec3(0,-1, 0)),
-        growthLength(0.5),
+        growthLength(50),
         scan(true),
         grow(true) {};
 
@@ -32,7 +32,7 @@ struct node{
         parent(_parent),
         pos(_pos),
         dir(_dir),
-        growthLength(1),
+        growthLength(50),
         scan(_scan),
         grow(_grow) {};
 
@@ -53,16 +53,16 @@ struct charge{
     charge():
         pos(glm::vec3(0,0,0)),
         closestNode(FLT_MAX, FLT_MAX, FLT_MAX),
-        attStrength(5.0),
+        attStrength(2.0),
         attDistance(0.0),
-        killDistance(1.0) {};
+        killDistance(50.0) {};
 
     charge(glm::vec3 _pos):
         pos(_pos),
         closestNode(FLT_MAX, FLT_MAX, FLT_MAX),
-        attStrength(0.5),
-        attDistance(5.0),
-        killDistance(1.0) {};
+        attStrength(1.0),
+        attDistance(500.0),
+        killDistance(150.0) {};
 
     ~charge() {}
 
@@ -85,15 +85,23 @@ class scol{
             charges = list<charge>();
 
             default_random_engine generator;
-            normal_distribution<float> distribution(7.5, 5);
-            normal_distribution<float> dist(0, 2.5);
+            normal_distribution<float> disty(750, 300);
+            normal_distribution<float> distxz(0, 75);
 
 
-            auto rolly = bind(distribution, generator);
-            auto rollxz = bind(dist, generator);
+            auto rolly = bind(disty, generator);
+            auto rollxz = bind(distxz, generator);
+
+            for (int i = 0; i < 100; i++) {
+                charges.push_back(charge(glm::vec3(rollxz(), rolly(), rollxz())));
+            }
 
             for (int i = 0; i < 10; i++) {
-                charges.push_back(charge(glm::vec3(rollxz(), rolly(), rollxz())));
+                charges.push_back(charge(glm::vec3(rollxz(), rollxz() + 1350, rollxz())));
+            }
+
+            for (int i = 0; i < 10; i++) {
+                charges.push_back(charge(glm::vec3(rollxz(), rollxz() + 250, rollxz())));
             }
 
             floor = charge();
