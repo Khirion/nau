@@ -1,5 +1,3 @@
 {
-    "files.associations": {
-        "tuple": "cpp"
-    }
+    "cmake.configureOnOpen": false
 }

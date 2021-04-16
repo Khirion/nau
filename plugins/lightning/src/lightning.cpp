@@ -68,7 +68,6 @@ PassLightning::Create(const std::string& passName) {
 PassLightning::PassLightning(const std::string& passName) :
 	Pass(passName) {
 
-	sCol.init();
 	m_ClassName = "lightningPI";
 	m_Inited = false;
 }
@@ -131,7 +130,7 @@ void
 PassLightning::prepare(void) {
 
 	if (!m_Inited) {
-
+        sCol.grow();
 		prepareGeometry();
 	}
 	prepareBuffers();
