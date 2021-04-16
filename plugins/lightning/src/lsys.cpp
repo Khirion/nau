@@ -8,11 +8,11 @@ void lsys::generate() {
 
     for (char c : statement) {
         it = rules.find(c);
-        if (it != rules.end()) 
-           block = parseRules(it->second);
+        if (it != rules.end())
+            block = parseRules(it->second);
 
-        else 
-           block = c;
+        else
+            block = c;
 
         turtle(block);
         nextState = nextState + block;
@@ -26,7 +26,7 @@ string lsys::parseRules(const vector<tuple<double, string>>& rules) {
     for (tuple<double, string> p : rules) {
         probs.push_back(get<0>(p));
     }
-    discrete_distribution<int> distribution (probs.begin(), probs.end());
+    discrete_distribution<int> distribution(probs.begin(), probs.end());
 
     return get<1>(rules[distribution(generator)]);
 }
@@ -36,41 +36,41 @@ void lsys::turtle(string state) {
     vector<glm::vec3> line = vector<glm::vec3>(2);
     for (char c : state) {
         switch (c) {
-            case 'F':
-                line[0] = matrix * glm::vec4(0, 0, 0, 1);
-                matrix = glm::translate(matrix, glm::vec3(0,(len / (states.size() + 1)), 0));
-                line[1] = matrix * glm::vec4(0, 0, 0, 1);
+        case 'F':
+            line[0] = matrix * glm::vec4(0, 0, 0, 1);
+            matrix = glm::translate(matrix, glm::vec3(0, (len / (states.size() + 1)), 0));
+            line[1] = matrix * glm::vec4(0, 0, 0, 1);
 
-                lines.push_back(line);
-                break;
-            case '+':
-                matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(1, 0, 0));
-                break;
-            case '-':
-                matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(-1, 0, 0));
-                break;
-            case '[':
-                mStack.push(matrix);
-                break;
-            case ']':
-                matrix = mStack.top();
-                mStack.pop();
-                break;
-            case '^':
-                matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, 0, 1));
-                break;
-            case '&':
-                matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, 0, -1));
-                break;
-            case '<':
-                matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, 1, 0));
-                break;
-            case '>':
-                matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, -1, 0));
-                break;
-            case '|':
-                matrix = glm::rotate(matrix, glm::radians(180.f), glm::vec3(0, 1, 0));
-                break;
+            lines.push_back(line);
+            break;
+        case '+':
+            matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(1, 0, 0));
+            break;
+        case '-':
+            matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(-1, 0, 0));
+            break;
+        case '[':
+            mStack.push(matrix);
+            break;
+        case ']':
+            matrix = mStack.top();
+            mStack.pop();
+            break;
+        case '^':
+            matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, 0, 1));
+            break;
+        case '&':
+            matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, 0, -1));
+            break;
+        case '<':
+            matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, 1, 0));
+            break;
+        case '>':
+            matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0, -1, 0));
+            break;
+        case '|':
+            matrix = glm::rotate(matrix, glm::radians(180.f), glm::vec3(0, 1, 0));
+            break;
         }
     }
 }
