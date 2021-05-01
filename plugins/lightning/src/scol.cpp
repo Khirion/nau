@@ -1,6 +1,35 @@
 #include "scol.hpp"
 
-float growthLength = 50;
+float growthLength;
+float killDistance;
+
+void scol::init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, int chargeNum, int gLength){
+    for (int i = 0; i < waypoints.size() - 1; i++) {
+        node root = node(waypoints[i].pos);
+        tree = std::vector<node>(1, root);
+
+        charges = std::list<charge>();
+
+        std::default_random_engine generator;
+        std::normal_distribution<float> disty(distYAvg, distYDev);
+        std::normal_distribution<float> distxz(distXZAvg, distXZDev);
+
+        glm::vec3 middlePoint = glm::vec3((waypoints[i].pos + waypoints[i].pos)/2.0f);
+
+        auto rolly = bind(disty, generator);
+        auto rollxz = bind(distxz, generator);
+
+        for (int i = 0; i < chargeNum; i++) {
+            charges.push_back(charge(glm::vec3(middlePoint + rollxz(), middlePoint + rolly(), middlePoint + rollxz()), killDistance));
+        }
+        charges.push_back(waypoints[i+1]);
+
+        growthLength = gLength;
+        killDistance = killDst;
+    
+        grow();
+    }
+};
 
 void scol::grow() {
     std::vector<node>::iterator n;
@@ -8,36 +37,25 @@ void scol::grow() {
     node curNode;
     bool end = false;
 
-    while (!end) {
+    while (!charges.empty()) {
         updateAttractors();
 
         for (const charge& c : charges) {
-            n = find_if(tree.begin(), tree.end(), [c](node x) {return x == c.closestNode; });
+            n = find_if(tree.begin(), tree.end(), [c](node x) {return x == c.closestNode;});
             if (n != tree.end()) {
                 n->scan = true;
-                n->dir += glm::normalize((c.pos - n->pos) * (c.attStrength / glm::distance(c.pos, n->pos)));
-                n->dir = glm::normalize(randdir(n->dir));
+                n->dir += glm::normalize((c.pos - n->pos) / glm::distance(c.pos, n->pos));
+                n->dir = glm::normalize(n->dir);
             }
-        }
-
-        n = find_if(tree.begin(), tree.end(), [this](node x) {return x == floor.closestNode; });
-        if (n != tree.end()) {
-            n->scan = true;
-            n->dir += glm::normalize((floor.pos - n->pos) * (floor.attStrength / glm::distance(floor.pos, n->pos)));
-            n->dir = glm::normalize(randdir(n->dir));
         }
 
         int curSize = tree.size();
         for (int i = 0; i < curSize; i++) {
             curNode = tree[i];
             if (curNode.scan) {
-                node child = node(curNode.pos, curNode.pos + (curNode.dir * growthLength));
-                if (child.pos.y <= 0)
-                    end = true;
-                else {
-                    charges.remove_if([child](charge x) {return glm::distance(x.pos, child.pos) < x.killDistance; });
-                    tree.push_back(child);
-                }
+                node child = node(curNode.pos, curNode.pos + (curNode.dir * growthLength), curNode.dir);
+                charges.remove_if([child](charge x) {return glm::distance(x.pos, child.pos) < x.kd; });
+                tree.push_back(child);
             }
         }
     }
@@ -53,14 +71,10 @@ void scol::updateAttractors() {
             n->scan = false;
             for (c = charges.begin(); c != charges.end(); c++) {
                 dist = glm::distance(n->pos, c->pos);
-                if (dist <= c->attDistance) {
-                    if (dist < glm::distance(c->closestNode, c->pos))
-                        c->closestNode = n->pos;
-                }
+                if (dist < glm::distance(c->closestNode, c->pos))
+                    c->closestNode = n->pos;
             }
         }
-        if (glm::distance(n->pos, floor.pos) < glm::distance(floor.closestNode, floor.pos))
-            floor.closestNode = n->pos;
     }
 }
 
