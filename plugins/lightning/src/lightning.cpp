@@ -1,6 +1,3 @@
-#include "lightning.hpp"
-
-#include "iNau.h"
 #include "nau.h"
 #include "nau/geometry/vertexData.h"
 #include "nau/material/iTexture.h"
@@ -9,10 +6,10 @@
 #include "nau/render/passFactory.h"
 #include "nau/scene/sceneFactory.h"
 
-
-
 #include <glbinding/gl/gl.h>
 #include <glbinding/Binding.h>
+
+#include "lightning.hpp"
 
 #ifdef WIN32
 #include <Windows.h>
@@ -52,16 +49,34 @@ getClassName() {
 	return className;
 }
 
+void
+PassLightning::init() {
+	Attribs.add(Attribute(CHARGES, "CHARGES", Enums::INT, false, new NauInt(100000)));
+	Attribs.add(Attribute(GROWTH_LENGTH, "GROWTH_LENGTH", Enums::INT, false, new NauInt(50)));
 
-using namespace nau::geometry;
-using namespace nau::math;
-using namespace nau::render;
-using namespace nau::scene;
+	Attribs.add(Attribute(DIST_Y_AVG, "DIST_Y_AVG", Enums::FLOAT, false, new NauFloat(0.0f)));
+	Attribs.add(Attribute(DIST_Y_DEV, "DIST_Y_DEV", Enums::FLOAT, false, new NauFloat(275.0f)));
+	Attribs.add(Attribute(DIST_XZ_AVG, "DIST_XZ_AVG", Enums::FLOAT, false, new NauFloat(0.0f)));
+	Attribs.add(Attribute(DIST_XZ_DEV, "DIST_XZ_DEV", Enums::FLOAT, false, new NauFloat(50.0f)));
 
-Pass*
+	Attribs.add(Attribute(KILL_DST, "KILL_DST", Enums::FLOAT, false, new NauFloat(125.0f)));
+
+	Attribs.add(Attribute(RESTART, "RESTART", Enums::BOOL, false));
+
+	//#ifndef _WINDLL
+	NAU->registerAttributes("LIGHTNINGPASS", &Attribs);
+	//#endif
+
+	PASSFACTORY->registerClass("lightning", Create);
+	registerAndInitArrays(Attribs);
+
+	m_BoolProps[RESTART] = true;
+}
+
+std::shared_ptr<Pass>
 PassLightning::Create(const std::string& passName) {
-	
-	return new PassLightning(passName);
+
+	return dynamic_pointer_cast<Pass>(std::shared_ptr<Pass>(new PassLightning(passName)));
 }
 
 
@@ -69,14 +84,13 @@ PassLightning::PassLightning(const std::string& passName) :
 	Pass(passName) {
 
 	m_ClassName = "lightningPI";
-	m_Inited = false;
+	init();
 }
 
 
 PassLightning::~PassLightning(void) {
 
 }
-
 
 void
 PassLightning::prepareGeometry() {
@@ -89,15 +103,13 @@ PassLightning::prepareGeometry() {
 	// fill in vertex array
 	vector<glm::vec3> vaux = sCol.getVertices();
 	vector<unsigned int> iaux = sCol.getIndices();
-	glm::vec3 aux;
 	int vertexCount = vaux.size();
-
+	
 	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
 		std::shared_ptr<std::vector<VertexData::Attr>>(new std::vector<VertexData::Attr>(vertexCount));
 
 	for(int i = 0; i < vertexCount; i++){
-		aux = vaux[i];
-		vertices->at(i).set(aux.x, aux.y, aux.z);
+		vertices->at(i).set(vaux[i].x, vaux[i].y, vaux[i].z);
 	}
 
 	std::shared_ptr<VertexData>& vertexData = m_Renderable->getVertexData();
@@ -120,22 +132,22 @@ PassLightning::prepareGeometry() {
 
 	addScene("my_scene");
 
-	m_Inited = true;
-
-
+	m_BoolProps[RESTART] = false;
 }
 
 
 void
 PassLightning::prepare(void) {
 
-	if (!m_Inited) {
-        sCol.grow();
+	if (m_BoolProps[RESTART]) {
+		sCol = scol();
+        sCol.init(m_FloatProps[DIST_Y_AVG], m_FloatProps[DIST_Y_DEV],
+			m_FloatProps[DIST_XZ_DEV], m_FloatProps[DIST_XZ_DEV],
+			m_FloatProps[KILL_DST], m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH]);
 		prepareGeometry();
 	}
 	prepareBuffers();
 	setupCamera();
-
 }
 
 
@@ -166,6 +178,4 @@ PassLightning::doPass(void) {
 	RENDERER->setDepthClamping(true);
 
 	RENDERMANAGER->processQueue();
-
 }
-
