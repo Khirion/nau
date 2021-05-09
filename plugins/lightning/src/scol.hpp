@@ -10,6 +10,8 @@
 #include <list>
 #include <vector>
 
+#include <iostream>
+
 struct node {
     glm::vec3 parent;
     glm::vec3 pos;
@@ -27,6 +29,13 @@ struct node {
         parent(_pos),
         pos(_pos),
         dir(0,-1,0),
+        scan(true)
+    {};
+
+    node(glm::vec3 _pos, glm::vec3 _dir) :
+        parent(_pos),
+        pos(_pos),
+        dir(_dir),
         scan(true)
     {};
 
@@ -85,7 +94,7 @@ public:
     std::vector<glm::vec3> getVertices();
     std::vector<unsigned int> getIndices();
 
-    void init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, int chargeNum, int gLength);
+    void init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, float attDst, int chargeNum, int gLength);
     void grow();
     glm::vec3 randdir(glm::vec3 vec);
     void updateAttractors();
