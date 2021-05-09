@@ -2,31 +2,42 @@
 
 float growthLength;
 float killDistance;
+float attDistance;
 
-void scol::init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, int chargeNum, int gLength){
+void scol::init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, float attDst, int chargeNum, int gLength){
+    growthLength = gLength;
+    killDistance = killDst;
+    attDistance = attDst;
+
+    waypoints = std::vector<charge>({ charge(glm::vec3(0.f,1500.f,0.f), growthLength), charge(glm::vec3(0.f,0.f,0.f), growthLength) });
+
+    // Random Engine
+    std::default_random_engine generator;
+    std::normal_distribution<float> disty(distYAvg, distYDev);
+    std::normal_distribution<float> distxz(distXZAvg, distXZDev);
+    auto rolly = bind(disty, generator);
+    auto rollxz = bind(distxz, generator);
+
+    std::vector<node>::iterator n;
+    charge w;
+
+    tree = std::vector<node>(1, node(waypoints[0].pos, normalize(waypoints[1].pos - waypoints[0].pos)));
+    charges = std::list<charge>();
+
     for (int i = 0; i < waypoints.size() - 1; i++) {
-        node root = node(waypoints[i].pos);
-        tree = std::vector<node>(1, root);
+        if (i) {
+            w = waypoints[i];
+            n = find_if(tree.begin(), tree.end(), [w](node n) {return distance(w.pos, n.pos) < w.kd;});
+            tree.push_back(node(n->pos, waypoints[0].pos, normalize(waypoints[1].pos - waypoints[0].pos)));
+        }
 
-        charges = std::list<charge>();
-
-        std::default_random_engine generator;
-        std::normal_distribution<float> disty(distYAvg, distYDev);
-        std::normal_distribution<float> distxz(distXZAvg, distXZDev);
-
-        glm::vec3 middlePoint = glm::vec3((waypoints[i].pos + waypoints[i].pos)/2.0f);
-
-        auto rolly = bind(disty, generator);
-        auto rollxz = bind(distxz, generator);
+        glm::vec3 middlePoint = (waypoints[i].pos + waypoints[i+1].pos)/2.0f;
 
         for (int i = 0; i < chargeNum; i++) {
-            charges.push_back(charge(glm::vec3(middlePoint + rollxz(), middlePoint + rolly(), middlePoint + rollxz()), killDistance));
+            charges.push_back(charge(glm::vec3(middlePoint.x + rollxz(), middlePoint.y + rolly(), middlePoint.z + rollxz()), killDistance));
         }
         charges.push_back(waypoints[i+1]);
 
-        growthLength = gLength;
-        killDistance = killDst;
-    
         grow();
     }
 };
@@ -71,7 +82,7 @@ void scol::updateAttractors() {
             n->scan = false;
             for (c = charges.begin(); c != charges.end(); c++) {
                 dist = glm::distance(n->pos, c->pos);
-                if (dist < glm::distance(c->closestNode, c->pos))
+                if (dist < glm::distance(c->closestNode, c->pos) && dist <= attDistance)
                     c->closestNode = n->pos;
             }
         }

@@ -54,12 +54,13 @@ PassLightning::init() {
 	Attribs.add(Attribute(CHARGES, "CHARGES", Enums::INT, false, new NauInt(100000)));
 	Attribs.add(Attribute(GROWTH_LENGTH, "GROWTH_LENGTH", Enums::INT, false, new NauInt(50)));
 
-	Attribs.add(Attribute(DIST_Y_AVG, "DIST_Y_AVG", Enums::FLOAT, false, new NauFloat(0.0f)));
-	Attribs.add(Attribute(DIST_Y_DEV, "DIST_Y_DEV", Enums::FLOAT, false, new NauFloat(275.0f)));
-	Attribs.add(Attribute(DIST_XZ_AVG, "DIST_XZ_AVG", Enums::FLOAT, false, new NauFloat(0.0f)));
-	Attribs.add(Attribute(DIST_XZ_DEV, "DIST_XZ_DEV", Enums::FLOAT, false, new NauFloat(50.0f)));
+	Attribs.add(Attribute(DIST_Y_AVG, "DIST_Y_AVG", Enums::FLOAT, false, new NauFloat(0.f)));
+	Attribs.add(Attribute(DIST_Y_DEV, "DIST_Y_DEV", Enums::FLOAT, false, new NauFloat(275.f)));
+	Attribs.add(Attribute(DIST_XZ_AVG, "DIST_XZ_AVG", Enums::FLOAT, false, new NauFloat(0.f)));
+	Attribs.add(Attribute(DIST_XZ_DEV, "DIST_XZ_DEV", Enums::FLOAT, false, new NauFloat(50.f)));
 
-	Attribs.add(Attribute(KILL_DST, "KILL_DST", Enums::FLOAT, false, new NauFloat(125.0f)));
+	Attribs.add(Attribute(KILL_DST, "KILL_DST", Enums::FLOAT, false, new NauFloat(125.f)));
+	Attribs.add(Attribute(ATT_DST, "ATT_DST", Enums::FLOAT, false, new NauFloat(250.f)));
 
 	Attribs.add(Attribute(RESTART, "RESTART", Enums::BOOL, false));
 
@@ -70,7 +71,22 @@ PassLightning::init() {
 	PASSFACTORY->registerClass("lightning", Create);
 	registerAndInitArrays(Attribs);
 
-	m_BoolProps[RESTART] = true;
+	loadWaypoints();
+
+	m_Inited = false;
+	m_BoolProps[RESTART] = false;
+}
+
+void
+PassLightning::loadWaypoints() {
+	IBuffer* aBuffer = RESOURCEMANAGER->getBuffer("Waypoints::waypoints");
+	unsigned int bsize = aBuffer->getPropui(IBuffer::SIZE);
+	void* data;
+	data = malloc(bsize);
+	aBuffer->getData(0, bsize, data);
+
+	cout << &data;
+
 }
 
 std::shared_ptr<Pass>
@@ -94,10 +110,10 @@ PassLightning::~PassLightning(void) {
 
 void
 PassLightning::prepareGeometry() {
-	std::shared_ptr<IScene> m_Scene = RENDERMANAGER->createScene("my_scene", "Scene");
+	std::shared_ptr<IScene> m_Scene = RENDERMANAGER->createScene("Lightning", "Scene");
 
 	// create a renderable
-	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->createRenderable("Mesh", "lightning");
+	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->createRenderable("Mesh", "Lightning");
 	m_Renderable->setDrawingPrimitive(nau::render::IRenderable::LINES);
 
 	// fill in vertex array
@@ -130,22 +146,63 @@ PassLightning::prepareGeometry() {
 
 	m_Scene->add(m_SceneObject);
 
-	addScene("my_scene");
+	addScene("Lightning");
+
+	m_Inited = true;
+}
+
+void
+PassLightning::restartGeometry() {
+	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("Lightning");
+
+	// fill in vertex array
+	vector<glm::vec3> vaux = sCol.getVertices();
+	vector<unsigned int> iaux = sCol.getIndices();
+	int vertexCount = vaux.size();
+
+	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
+		std::shared_ptr<std::vector<VertexData::Attr>>(new std::vector<VertexData::Attr>(vertexCount));
+
+	for (int i = 0; i < vertexCount; i++) {
+		vertices->at(i).set(vaux[i].x, vaux[i].y, vaux[i].z);
+	}
+
+	std::shared_ptr<VertexData>& vertexData = m_Renderable->getVertexData();
+
+	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
+
+	// create indices and fill the array
+	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(iaux);
+
+	// create the material group
+	std::shared_ptr<MaterialGroup> aMaterialGroup = m_Renderable->getMaterialGroups()[0];
+	aMaterialGroup->setIndexList(indices);
+
+	RENDERMANAGER->getScene("Lightning")->recompile();
 
 	m_BoolProps[RESTART] = false;
 }
 
-
 void
 PassLightning::prepare(void) {
-
-	if (m_BoolProps[RESTART]) {
+	if (!m_Inited) {
 		sCol = scol();
         sCol.init(m_FloatProps[DIST_Y_AVG], m_FloatProps[DIST_Y_DEV],
 			m_FloatProps[DIST_XZ_DEV], m_FloatProps[DIST_XZ_DEV],
-			m_FloatProps[KILL_DST], m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH]);
+			m_FloatProps[KILL_DST], m_FloatProps[ATT_DST],
+			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH]);
 		prepareGeometry();
 	}
+	
+	if (m_BoolProps[RESTART]) {
+		sCol = scol();
+		sCol.init(m_FloatProps[DIST_Y_AVG], m_FloatProps[DIST_Y_DEV],
+			m_FloatProps[DIST_XZ_DEV], m_FloatProps[DIST_XZ_DEV],
+			m_FloatProps[KILL_DST], m_FloatProps[ATT_DST],
+			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH]);
+		restartGeometry();
+	}
+
 	prepareBuffers();
 	setupCamera();
 }
