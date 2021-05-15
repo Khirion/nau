@@ -15,6 +15,7 @@ class PassLightning : public Pass
 		{
 		protected:
 			scol sCol;
+			vector<glm::vec3> waypoints;
 			bool m_Inited;
 			void prepareGeometry();
 			void restartGeometry();
