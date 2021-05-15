@@ -55,7 +55,7 @@ PassLightning::init() {
 	Attribs.add(Attribute(GROWTH_LENGTH, "GROWTH_LENGTH", Enums::INT, false, new NauInt(50)));
 
 	Attribs.add(Attribute(DIST_Y_AVG, "DIST_Y_AVG", Enums::FLOAT, false, new NauFloat(0.f)));
-	Attribs.add(Attribute(DIST_Y_DEV, "DIST_Y_DEV", Enums::FLOAT, false, new NauFloat(275.f)));
+	Attribs.add(Attribute(DIST_Y_DEV, "DIST_Y_DEV", Enums::FLOAT, false, new NauFloat(0.f)));
 	Attribs.add(Attribute(DIST_XZ_AVG, "DIST_XZ_AVG", Enums::FLOAT, false, new NauFloat(0.f)));
 	Attribs.add(Attribute(DIST_XZ_DEV, "DIST_XZ_DEV", Enums::FLOAT, false, new NauFloat(50.f)));
 
@@ -81,12 +81,14 @@ void
 PassLightning::loadWaypoints() {
 	IBuffer* aBuffer = RESOURCEMANAGER->getBuffer("Waypoints::waypoints");
 	unsigned int bsize = aBuffer->getPropui(IBuffer::SIZE);
-	void* data;
-	data = malloc(bsize);
+	float* data = (float*)malloc(bsize);
 	aBuffer->getData(0, bsize, data);
 
-	cout << &data;
+	waypoints = vector<glm::vec3>();
 
+	for (int i = 0; i < bsize / 4; i += 3) {
+		waypoints.push_back(glm::vec3(data[i], data[i + 1], data[i + 2]));
+	}
 }
 
 std::shared_ptr<Pass>
@@ -190,7 +192,7 @@ PassLightning::prepare(void) {
         sCol.init(m_FloatProps[DIST_Y_AVG], m_FloatProps[DIST_Y_DEV],
 			m_FloatProps[DIST_XZ_DEV], m_FloatProps[DIST_XZ_DEV],
 			m_FloatProps[KILL_DST], m_FloatProps[ATT_DST],
-			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH]);
+			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH], waypoints);
 		prepareGeometry();
 	}
 	
@@ -199,7 +201,7 @@ PassLightning::prepare(void) {
 		sCol.init(m_FloatProps[DIST_Y_AVG], m_FloatProps[DIST_Y_DEV],
 			m_FloatProps[DIST_XZ_DEV], m_FloatProps[DIST_XZ_DEV],
 			m_FloatProps[KILL_DST], m_FloatProps[ATT_DST],
-			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH]);
+			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH], waypoints);
 		restartGeometry();
 	}
 

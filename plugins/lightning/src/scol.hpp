@@ -94,7 +94,7 @@ public:
     std::vector<glm::vec3> getVertices();
     std::vector<unsigned int> getIndices();
 
-    void init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, float attDst, int chargeNum, int gLength);
+    void init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, float attDst, int chargeNum, int gLength, std::vector<glm::vec3> ways);
     void grow();
     glm::vec3 randdir(glm::vec3 vec);
     void updateAttractors();
