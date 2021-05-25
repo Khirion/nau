@@ -9,14 +9,9 @@ void scol::init(float distYAvg, float distYDev, float distXZAvg, float distXZDev
     killDistance = killDst;
     attDistance = attDst;
 
-    waypoints = std::vector<charge>();
-
-    for (glm::vec3 way : ways) {
-        waypoints.push_back(charge(way, growthLength));
-    }
+    addWaypoints(ways);
 
     std::vector<node>::iterator n;
-    charge w;
 
     tree = std::vector<node>(1, node(waypoints[0].pos, glm::normalize(waypoints[1].pos - waypoints[0].pos)));
 
@@ -24,78 +19,83 @@ void scol::init(float distYAvg, float distYDev, float distXZAvg, float distXZDev
         charges = std::list<charge>();
 
         if (i) {
-            w = waypoints[i];
+            charge w = waypoints[i];
             n = find_if(tree.begin(), tree.end(), [w](node n) {return glm::distance(w.pos, n.pos) < w.kd;});
-            tree.push_back(node(n->pos, waypoints[0].pos, glm::normalize(waypoints[1].pos - waypoints[0].pos)));
+            tree.push_back(node(n->pos, waypoints[i].pos, glm::normalize(waypoints[i+1].pos - waypoints[i].pos)));
         }
 
         glm::vec3 avg = (waypoints[i].pos + waypoints[i+1].pos)/2.0f;
-        glm::vec3 dev = avg/2.0f;
+        glm::vec3 dev = avg/4.0f;
 
-        // Random Engine
-        std::default_random_engine generator;
-        std::normal_distribution<float> disty(avg.y + distYAvg, dev.y + distYDev);
-        std::normal_distribution<float> distx(avg.x + distXZAvg, dev.x + distXZDev);
-        std::normal_distribution<float> distz(avg.z + distXZAvg, dev.z + distXZDev);
-        auto rolly = bind(disty, generator);
-        auto rollx = bind(distx, generator);
-        auto rollz = bind(distz, generator);
-
-        for (int i = 0; i < chargeNum; i++) {
-            charges.push_back(charge(glm::vec3(rollx(), rolly(), rollz()), killDistance));
-        }
+        genCharges(avg, dev, distYAvg, distYDev, distXZAvg, distXZDev, chargeNum);
         charges.push_back(waypoints[i+1]);
 
         grow();
     }
 };
 
+void scol::addWaypoints(std::vector<glm::vec3> ways) {
+    waypoints = std::vector<charge>();
+
+    for (glm::vec3 way : ways) {
+        waypoints.push_back(charge(way, growthLength));
+    }
+}
+
+void scol::genCharges(glm::vec3 avg, glm::vec3 dev, float distYAvg, float distYDev, float distXZAvg, float distXZDev, int chargeNum) {
+    // Random Engine
+    std::default_random_engine generator;
+    std::normal_distribution<float> disty((avg.y + distYAvg), (dev.y + distYDev));
+    std::normal_distribution<float> distx((avg.x + distXZAvg), (dev.x + distXZDev));
+    std::normal_distribution<float> distz((avg.z + distXZAvg), (dev.z + distXZDev));
+
+    for (int i = 0; i < chargeNum; i++) {
+        charges.push_back(charge(glm::vec3(distx(generator), disty(generator), distz(generator)), killDistance));
+    }
+}
+
 void scol::grow() {
     std::vector<node>::iterator n;
-    std::list<charge>::iterator c;
     node curNode;
     bool end = false;
 
-    updateAttractors();
-    /*c = find_if(charges.begin(), charges.end(), [](charge x) {return !(glm::all(glm::equal(x.closestNode, glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX)))); });
-
     // Initial Growth
-    while (c == charges.end()) {
+    while (!updateAttractors()) {
         curNode = tree.back();
         node child = node(curNode.pos, curNode.pos + (curNode.dir * growthLength), glm::normalize(randdir(curNode.dir)));
-        charges.remove_if([child](charge x) {return glm::distance(x.pos, child.pos) < x.kd; });
+        charges.remove_if([child](charge x) {return glm::distance(x.pos, child.pos) <= x.kd; });
         tree.push_back(child);
-
-        updateAttractors();
-        c = find_if(charges.begin(), charges.end(), [](charge x) {return !(glm::all(glm::equal(x.closestNode, glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX)))); });
-    }*/
+    }
 
     // Space Colonization Growth
-    while (!charges.empty() && c != charges.end()) {
+    while (!charges.empty() && updateAttractors()) {
         for (const charge& charge : charges) {
             n = find_if(tree.begin(), tree.end(), [charge](node x) {return x == charge.closestNode;});
             if (n != tree.end()) {
                 n->scan = true;
-                n->dir += glm::normalize((charge.pos - n->pos) / glm::distance(charge.pos, n->pos));
-                n->dir = glm::normalize(n->dir);
+                float dt = glm::distance(charge.pos, n->pos);
+                n->dir += normalize(charge.pos - n->pos)/dt*dt;
             }
         }
 
-        int curSize = tree.size();
+        for (n = tree.begin(); n != tree.end(); n++) {
+            if (n->scan)
+                n->dir = glm::normalize(n->dir);
+        }
+
+        size_t curSize = tree.size();
         for (int i = 0; i < curSize; i++) {
             curNode = tree[i];
             if (curNode.scan) {
                 node child = node(curNode.pos, curNode.pos + (curNode.dir * growthLength), curNode.dir);
-                charges.remove_if([child](charge x) {return glm::distance(x.pos, child.pos) < x.kd; });
+                charges.remove_if([child](charge x) {return glm::distance(x.pos, child.pos) <= x.kd; });
                 tree.push_back(child);
             }
         }
-        updateAttractors();
-        c = find_if(charges.begin(), charges.end(), [](charge x) {return !(glm::all(glm::equal(x.closestNode, glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX)))); });
     }
 }
 
-void scol::updateAttractors() {
+bool scol::updateAttractors() {
     std::vector<node>::iterator n;
     std::list<charge>::iterator c;
     float dist;
@@ -105,11 +105,18 @@ void scol::updateAttractors() {
             n->scan = false;
             for (c = charges.begin(); c != charges.end(); c++) {
                 dist = glm::distance(n->pos, c->pos);
-                if (dist < glm::distance(c->closestNode, c->pos) && dist <= attDistance)
+                if (dist <= attDistance && dist < glm::distance(c->closestNode, c->pos))
                     c->closestNode = n->pos;
             }
         }
     }
+
+    c = find_if(charges.begin(), charges.end(), [](charge x) {return !(glm::all(glm::equal(x.closestNode, glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX)))); });
+
+    if (c == charges.end())
+        return false;
+    else
+        return true;
 }
 
 glm::vec3 scol::randdir(glm::vec3 vec) {
