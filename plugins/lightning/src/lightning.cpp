@@ -51,22 +51,7 @@ getClassName() {
 
 void
 PassLightning::init() {
-	Attribs.add(Attribute(CHARGES, "CHARGES", Enums::INT, false, new NauInt(100000)));
-	Attribs.add(Attribute(GROWTH_LENGTH, "GROWTH_LENGTH", Enums::INT, false, new NauInt(50)));
-
-	Attribs.add(Attribute(DIST_Y_AVG, "DIST_Y_AVG", Enums::FLOAT, false, new NauFloat(0.f)));
-	Attribs.add(Attribute(DIST_Y_DEV, "DIST_Y_DEV", Enums::FLOAT, false, new NauFloat(0.f)));
-	Attribs.add(Attribute(DIST_XZ_AVG, "DIST_XZ_AVG", Enums::FLOAT, false, new NauFloat(0.f)));
-	Attribs.add(Attribute(DIST_XZ_DEV, "DIST_XZ_DEV", Enums::FLOAT, false, new NauFloat(50.f)));
-
-	Attribs.add(Attribute(KILL_DST, "KILL_DST", Enums::FLOAT, false, new NauFloat(125.f)));
-	Attribs.add(Attribute(ATT_DST, "ATT_DST", Enums::FLOAT, false, new NauFloat(250.f)));
-
-	Attribs.add(Attribute(RESTART, "RESTART", Enums::BOOL, false));
-
-	//#ifndef _WINDLL
-	NAU->registerAttributes("LIGHTNINGPASS", &Attribs);
-	//#endif
+	RESTART = Attribs.get("RESTART")->getId();
 
 	PASSFACTORY->registerClass("lightning", Create);
 	registerAndInitArrays(Attribs);
@@ -121,7 +106,7 @@ PassLightning::prepareGeometry() {
 	// fill in vertex array
 	vector<glm::vec3> vaux = sCol.getVertices();
 	vector<unsigned int> iaux = sCol.getIndices();
-	int vertexCount = vaux.size();
+	size_t vertexCount = vaux.size();
 	
 	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
 		std::shared_ptr<std::vector<VertexData::Attr>>(new std::vector<VertexData::Attr>(vertexCount));
@@ -160,7 +145,7 @@ PassLightning::restartGeometry() {
 	// fill in vertex array
 	vector<glm::vec3> vaux = sCol.getVertices();
 	vector<unsigned int> iaux = sCol.getIndices();
-	int vertexCount = vaux.size();
+	size_t vertexCount = vaux.size();
 
 	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
 		std::shared_ptr<std::vector<VertexData::Attr>>(new std::vector<VertexData::Attr>(vertexCount));
@@ -189,19 +174,19 @@ void
 PassLightning::prepare(void) {
 	if (!m_Inited) {
 		sCol = scol();
-        sCol.init(m_FloatProps[DIST_Y_AVG], m_FloatProps[DIST_Y_DEV],
-			m_FloatProps[DIST_XZ_DEV], m_FloatProps[DIST_XZ_DEV],
-			m_FloatProps[KILL_DST], m_FloatProps[ATT_DST],
-			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH], waypoints);
+        sCol.init(m_FloatProps[Attribs.get("DIST_Y_AVG")->getId()], m_FloatProps[Attribs.get("DIST_Y_DEV")->getId()],
+			m_FloatProps[Attribs.get("DIST_XZ_AVG")->getId()], m_FloatProps[Attribs.get("DIST_XZ_DEV")->getId()],
+			m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
+			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
 		prepareGeometry();
 	}
 	
 	if (m_BoolProps[RESTART]) {
 		sCol = scol();
-		sCol.init(m_FloatProps[DIST_Y_AVG], m_FloatProps[DIST_Y_DEV],
-			m_FloatProps[DIST_XZ_DEV], m_FloatProps[DIST_XZ_DEV],
-			m_FloatProps[KILL_DST], m_FloatProps[ATT_DST],
-			m_IntProps[CHARGES], m_IntProps[GROWTH_LENGTH], waypoints);
+		sCol.init(m_FloatProps[Attribs.get("DIST_Y_AVG")->getId()], m_FloatProps[Attribs.get("DIST_Y_DEV")->getId()],
+			m_FloatProps[Attribs.get("DIST_XZ_AVG")->getId()], m_FloatProps[Attribs.get("DIST_XZ_DEV")->getId()],
+			m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
+			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
 		restartGeometry();
 	}
 

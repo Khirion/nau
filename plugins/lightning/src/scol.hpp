@@ -58,18 +58,6 @@ struct charge {
     glm::vec3 closestNode;
     float kd;
 
-    charge() : // Default charge
-        pos(glm::vec3(0, 0, 0)),
-        closestNode(FLT_MAX, FLT_MAX, FLT_MAX),
-        kd(0)
-    {};
-
-    charge(glm::vec3 _pos) :
-        pos(_pos),
-        closestNode(FLT_MAX, FLT_MAX, FLT_MAX),
-        kd(0.1)
-    {};
-
     charge(glm::vec3 _pos, float _kd) :
         pos(_pos),
         closestNode(FLT_MAX, FLT_MAX, FLT_MAX),
@@ -96,6 +84,8 @@ public:
 
     void init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, float attDst, int chargeNum, int gLength, std::vector<glm::vec3> ways);
     void grow();
+    void addWaypoints(std::vector<glm::vec3> ways);
+    void genCharges(glm::vec3 avg, glm::vec3 dev, float distYAvg, float distYDev, float distXZAvg, float distXZDev, int chargeNum);
     glm::vec3 randdir(glm::vec3 vec);
-    void updateAttractors();
+    bool updateAttractors();
 };
