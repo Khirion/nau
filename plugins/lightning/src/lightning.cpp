@@ -174,19 +174,17 @@ void
 PassLightning::prepare(void) {
 	if (!m_Inited) {
 		sCol = scol();
-        sCol.init(m_FloatProps[Attribs.get("DIST_Y_AVG")->getId()], m_FloatProps[Attribs.get("DIST_Y_DEV")->getId()],
-			m_FloatProps[Attribs.get("DIST_XZ_AVG")->getId()], m_FloatProps[Attribs.get("DIST_XZ_DEV")->getId()],
-			m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
-			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
+        sCol.init(m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
+			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("SPHERES")->getId()],
+			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
 		prepareGeometry();
 	}
 	
 	if (m_BoolProps[RESTART]) {
 		sCol = scol();
-		sCol.init(m_FloatProps[Attribs.get("DIST_Y_AVG")->getId()], m_FloatProps[Attribs.get("DIST_Y_DEV")->getId()],
-			m_FloatProps[Attribs.get("DIST_XZ_AVG")->getId()], m_FloatProps[Attribs.get("DIST_XZ_DEV")->getId()],
-			m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
-			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
+		sCol.init(m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
+			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("SPHERES")->getId()],
+			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
 		restartGeometry();
 	}
 

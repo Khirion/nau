@@ -82,10 +82,10 @@ public:
     std::vector<glm::vec3> getVertices();
     std::vector<unsigned int> getIndices();
 
-    void init(float distYAvg, float distYDev, float distXZAvg, float distXZDev, float killDst, float attDst, int chargeNum, int gLength, std::vector<glm::vec3> ways);
+    void init(float killDst, float attDst, int sphereNum, int chargeNum, int gLength, std::vector<glm::vec3> ways);
     void grow();
     void addWaypoints(std::vector<glm::vec3> ways);
-    void genCharges(glm::vec3 avg, glm::vec3 dev, float distYAvg, float distYDev, float distXZAvg, float distXZDev, int chargeNum);
+    void genCharges(glm::vec3 root, glm::vec3 way, int sphereNum, int chargeNum);
     glm::vec3 randdir(glm::vec3 vec);
     bool updateAttractors();
 };
