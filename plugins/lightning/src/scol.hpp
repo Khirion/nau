@@ -13,20 +13,20 @@
 #include <iostream>
 
 struct node {
-    glm::vec3 parent;
+    int parentIndex;
     glm::vec3 pos;
     glm::vec3 dir;
     bool scan;
 
     node() : // Root
-        parent(glm::vec3(0, 1500, 0)),
+        parentIndex(0),
         pos(glm::vec3(0, 1500, 0)),
         dir(glm::vec3(0, -1, 0)),
         scan(true)
     {};
 
-    node(glm::vec3 _parent, glm::vec3 _pos, glm:: vec3 _dir) :
-        parent(_parent),
+    node(int _parent, glm::vec3 _pos, glm:: vec3 _dir) :
+        parentIndex(_parent),
         pos(_pos),
         dir(_dir),
         scan(true)
@@ -41,16 +41,19 @@ struct node {
 
 struct charge {
     glm::vec3 pos;
-    glm::vec3 closestNode;
+    int closestIndex;
+    bool reached;
 
     charge() :
         pos(glm::vec3(0, 0, 0)),
-        closestNode(glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX))
+        closestIndex(-1),
+        reached(false)
     {};
 
     charge(glm::vec3 _pos) :
         pos(_pos),
-        closestNode(glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX))
+        closestIndex(-1),
+        reached(false)
     {};
 
     ~charge() {}
@@ -66,7 +69,10 @@ private:
     std::list<charge> charges;
 
 public:
-    scol() {};
+    scol() :
+        tree(std::vector<node>()),
+        charges(std::list<charge>())
+    {};
     std::vector<glm::vec3> getVertices();
     std::vector<unsigned int> getIndices();
 
