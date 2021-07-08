@@ -1,42 +1,28 @@
 #include "scol.hpp"
 
-float growthLength;
 float killDistance;
 float attDistance;
+float growthLength;
 
-void scol::init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> ways){
-    growthLength = gLength;
+void scol::init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> waypoints){
     killDistance = killDst;
     attDistance = attDst;
+    growthLength = gLength;
 
-    addWaypoints(ways);
+    tree = std::vector<node>(1, node(waypoints[0], waypoints[0], glm::normalize(waypoints[1] - waypoints[0])));
 
-    std::vector<node>::iterator n;
+    /* for (int i = 0; i < waypoints.size() - 1; i++) {
+       if (i) {
+            glm::vec3 w = waypoints[i];
+            // Need to fix this -- Need to check the CLOSEST to the waypoint
+            n = find_if(tree.begin(), tree.end(), [w](node n) {return glm::distance(w, n.pos) < killDistance;});
+            tree.push_back(node(n->pos, waypoints[i], glm::normalize(waypoints[i+1] - waypoints[i])));
+        }*/
 
-    tree = std::vector<node>(1, node(waypoints[0].pos, glm::normalize(waypoints[1].pos - waypoints[0].pos)));
-
-    for (int i = 0; i < waypoints.size() - 1; i++) {
-        charges = std::list<charge>();
-
-        if (i) {
-            charge w = waypoints[i];
-            n = find_if(tree.begin(), tree.end(), [w](node n) {return glm::distance(w.pos, n.pos) < w.kd;});
-            tree.push_back(node(n->pos, waypoints[i].pos, glm::normalize(waypoints[i+1].pos - waypoints[i].pos)));
-        }
-
-        genCharges(waypoints[i].pos, waypoints[i+1].pos, sphereNum, chargeNum);
-        charges.push_back(waypoints[i+1]);
+        genCharges(waypoints[0], waypoints[1], sphereNum, chargeNum);
+        charges.push_back(waypoints[1]);
 
         grow();
-    }
-}
-
-void scol::addWaypoints(std::vector<glm::vec3> ways) {
-    waypoints = std::vector<charge>();
-
-    for (glm::vec3 way : ways) {
-        waypoints.push_back(charge(way, growthLength));
-    }
 }
 
 void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int chargeNum) {
@@ -46,12 +32,12 @@ void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int cha
 
     std::default_random_engine generator;
     std::uniform_real_distribution<float> randY(0.0, distance);
-    std::uniform_real_distribution<float> randXZ(-500, 500);
+    std::uniform_real_distribution<float> randXZ(-distance/10, distance/10);
     auto genY = bind(randY, generator);
     auto genXZ = bind(randXZ, generator);
 
     for (int i = 0; i < chargeNum; i++) {
-        charges.push_back(charge(glm::vec3(root.x - genXZ(), root.y - genY(), root.z - genXZ()), killDistance));
+        charges.push_back(glm::vec3(root.x - genXZ(), root.y - genY(), root.z - genXZ()));
     }
 
 }
@@ -91,12 +77,11 @@ void scol::grow() {
     bool end = false;
 
     // Initial Growth
-   /* while (!updateAttractors() && !charges.empty()) {
+   while (!updateAttractors() && !charges.empty()) {
         node curNode = tree.back();
         node child = node(curNode.pos, curNode.pos + (curNode.dir * growthLength), glm::normalize(randdir(curNode.dir)));
-        charges.remove_if([child](charge x) {return glm::distance(x.pos, child.pos) <= x.kd; });
         tree.push_back(child);
-    }*/
+    }
 
     // Space Colonization Growth
     while (updateAttractors()) {
@@ -110,13 +95,12 @@ void scol::grow() {
 
         for (n = tree.begin(); n != tree.end(); n++) {
             if (n->scan) {
-                n->dir = glm::normalize(n->dir);
+                n->dir = glm::normalize(randdir(normalize(n->dir)));
                 node child = node(n->pos, n->pos + (n->dir * growthLength), n->dir);
-                charges.remove_if([n](charge x) {return glm::distance(x.pos, n->pos) <= x.kd; });
+                charges.remove_if([n](charge x) {return glm::distance(n->pos, x.pos) <= killDistance; });
                 buffer.push_back(child);
             }
         }
-
         tree.insert(tree.end(), buffer.begin(), buffer.end());
         buffer.clear();
     }
@@ -125,26 +109,21 @@ void scol::grow() {
 bool scol::updateAttractors() {
     std::vector<node>::iterator n;
     std::list<charge>::iterator c;
+    bool flag = false;
     float dist;
 
-    if (charges.empty())
-        return false;
-
     for (n = tree.begin(); n != tree.end(); n++) {
-            n->scan = false;
-            for (c = charges.begin(); c != charges.end(); c++) {
-                dist = glm::distance(n->pos, c->pos);
-                if (dist <= attDistance && dist < glm::distance(c->closestNode, c->pos))
-                    c->closestNode = n->pos;
+        n->scan = false;
+        for (c = charges.begin(); c != charges.end(); c++) {
+            dist = glm::distance(n->pos, c->pos);
+            if (dist <= attDistance && dist <= glm::distance(c->closestNode, c->pos)) {
+                flag = true;
+                c->closestNode = n->pos;
+            }
         }
     }
 
-    c = find_if(charges.begin(), charges.end(), [](charge x) {return !(glm::all(glm::equal(x.closestNode, glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX)))); });
-
-    if (c == charges.end())
-        return false;
-    else
-        return true;
+    return flag;
 }
 
 glm::vec3 scol::randdir(glm::vec3 vec) {
