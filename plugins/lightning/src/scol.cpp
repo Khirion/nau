@@ -32,7 +32,7 @@ void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int cha
 
     std::default_random_engine generator;
     std::uniform_real_distribution<float> randY(0.0, distance);
-    std::uniform_real_distribution<float> randXZ(-distance/10, distance/10);
+    std::uniform_real_distribution<float> randXZ(-distance/2, distance/2);
     auto genY = bind(randY, generator);
     auto genXZ = bind(randXZ, generator);
 
