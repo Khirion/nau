@@ -5,41 +5,53 @@ float attDistance;
 float growthLength;
 
 void scol::init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> waypoints){
-    killDistance = killDst;
-    attDistance = attDst;
-    growthLength = gLength;
+    if (waypoints.size() % 2)
+        return;
 
-    /* for (int i = 0; i < waypoints.size() - 1; i++) {
-       if (i) {
-            glm::vec3 w = waypoints[i];
-            // Need to fix this -- Need to check the CLOSEST to the waypoint
-            n = find_if(tree.begin(), tree.end(), [w](node n) {return glm::distance(w, n.pos) < killDistance;});
-            tree.push_back(node(n->pos, waypoints[i], glm::normalize(waypoints[i+1] - waypoints[i])));
-        }*/
+    growthLength = gLength;
+    killDistance = killDst * growthLength;
+    attDistance = attDst * growthLength;
 
     tree.push_back(node(0, waypoints[0], glm::normalize(waypoints[1] - waypoints[0])));
-    charges.push_back(waypoints[1]);
-    
-    genCharges(waypoints[0], waypoints[1], sphereNum, chargeNum);
 
-    grow();
+    for (int i = 0; i < waypoints.size() - 1; i += 2) {
+        charges.push_back(waypoints[i+1]);
+
+        genCharges(waypoints[i], waypoints[i+1], sphereNum, chargeNum);
+
+        grow();
+    }
 }
 
 void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int chargeNum) {
     // Random Engine - TBD
     // Divide the length between waypoints according to the amount of spheres to create, randomly assign spheres to left/right, front/back as per the radius defined by the length/2 of each segment
-    float distance = glm::distance(root, waypoint);
+    genCone(root, waypoint, 1500, 1500, chargeNum);
+}
 
+void scol::genCone(glm::vec3 root, glm::vec3 waypoint, float height, float maxRad, int chargeNum) {
     std::default_random_engine generator;
-    std::uniform_real_distribution<float> randY(0.0, distance-5);
-    std::uniform_real_distribution<float> randXZ(-distance/4, distance/4);
-    auto genY = bind(randY, generator);
-    auto genXZ = bind(randXZ, generator);
+    std::uniform_real_distribution<float> rand(0.f, 1.f);
+    auto genR = bind(rand, generator);
 
-    for (int i = 0; i < chargeNum; i++) {
-        charges.push_back(glm::vec3(genXZ(), genY(), genXZ()));
+    float y = 0.f;
+    float radius = 0.f;
+    float angle = 0.f;
+    glm::mat3 transform(1);
+
+    if (!glm::all(glm::equal(glm::normalize(waypoint - root), glm::vec3(0, 1, 0)))) {
+        glm::vec3 new_y = glm::normalize(waypoint - root);
+        glm::vec3 new_z = glm::normalize(glm::cross(new_y, glm::vec3(0, 1, 0)));
+        glm::vec3 new_x = glm::normalize(glm::cross(new_y, new_z));
+        transform = glm::mat3(new_x, new_y, new_z);
     }
 
+    for (int i = 0; i < chargeNum; i++) {
+        y = genR() * height;
+        radius = sqrt(genR()) * ((maxRad) * (y / maxRad)); // Random radius element * maximum radius for the disc
+        angle = genR() * 2 * M_PI;
+        charges.push_back(root + (transform * glm::vec3(radius * cos(angle), y, radius * sin(angle))));
+    }
 }
 
 /* Sphere beta
@@ -87,17 +99,17 @@ void scol::grow() {
         for (const charge& charge : charges) {
             if (charge.closestIndex != -1){
                 n = tree.begin() + charge.closestIndex;
-                n->scan = true;
-                n->dir += 1.f/(charge.pos - n->pos);
+                n->attNum += 1;
+                n->dir += normalize(charge.pos - n->pos);
             }
         }
 
         int i = 0;
 
         for (n = tree.begin(); n != tree.end(); n++, i++) {
-            if (n->scan) {
-                n->dir = glm::normalize(n->dir);
-                node child = node(i, n->pos + (n->dir * growthLength), n->dir);
+            if (n->attNum > 0) {
+                n->dir = n->dir / n->attNum;
+                node child = node(i, n->pos + (n->dir * growthLength), glm::vec3(0,0,0));
                 buffer.push_back(child);
             }
         }
@@ -115,7 +127,7 @@ bool scol::updateAttractors() {
     float dist;
 
     for (n = tree.begin(); n != tree.end(); n++, i++) {
-        n->scan = false;
+        n->attNum = 0;
         for (c = charges.begin(); c != charges.end(); c++) {
             dist = glm::distance(n->pos, c->pos);
             if (dist <= attDistance) {

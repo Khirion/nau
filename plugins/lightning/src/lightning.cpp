@@ -157,6 +157,7 @@ PassLightning::restartGeometry() {
 	std::shared_ptr<VertexData>& vertexData = m_Renderable->getVertexData();
 
 	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
+	vertexData->resetCompilationFlag();
 
 	// create indices and fill the array
 	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(iaux);
@@ -164,6 +165,7 @@ PassLightning::restartGeometry() {
 	// create the material group
 	std::shared_ptr<MaterialGroup> aMaterialGroup = m_Renderable->getMaterialGroups()[0];
 	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->resetCompilationFlag();
 
 	RENDERMANAGER->getScene("Lightning")->recompile();
 
