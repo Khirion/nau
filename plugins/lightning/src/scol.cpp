@@ -29,12 +29,17 @@ void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int cha
     glm::mat3 transform(1);
 
     glm::vec3 center = (waypoint + root) / 2.f;
+    glm::vec3 vector = glm::normalize(waypoint - root);
 
-    if (!glm::all(glm::equal(glm::normalize(waypoint - root), glm::vec3(0, 1, 0)))) {
+    if (!(vector.x == 0 && vector.z == 0)) {
         glm::vec3 new_y = glm::normalize(waypoint - root);
         glm::vec3 new_z = glm::normalize(glm::cross(new_y, glm::vec3(0, 1, 0)));
         glm::vec3 new_x = glm::normalize(glm::cross(new_y, new_z));
         transform = glm::mat3(new_x, new_y, new_z);
+    }
+    else {
+        if (vector.y == -1)
+            transform = transform * -1.f;
     }
 
     float height = glm::distance(root, waypoint);
