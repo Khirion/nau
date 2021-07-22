@@ -1,0 +1,6 @@
+- Lighting.
+- Interface.
+
+Next week:
+-> New Charge Distribution
+-> Fix scene reloading
