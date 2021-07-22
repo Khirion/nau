@@ -4,7 +4,7 @@ float killDistance;
 float attDistance;
 float growthLength;
 
-void scol::init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> waypoints){
+void scol::init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> waypoints, int genType){
     if (waypoints.size() % 2)
         return;
 
@@ -17,27 +17,18 @@ void scol::init(float killDst, float attDst, int chargeNum, int sphereNum, int g
     for (int i = 0; i < waypoints.size() - 1; i += 2) {
         charges.push_back(waypoints[i+1]);
 
-        genCharges(waypoints[i], waypoints[i+1], sphereNum, chargeNum);
+        genCharges(waypoints[i], waypoints[i+1], sphereNum, chargeNum, genType);
 
         grow();
     }
 }
 
-void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int chargeNum) {
+void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int chargeNum, int genType) {
     // Random Engine - TBD
     // Divide the length between waypoints according to the amount of spheres to create, randomly assign spheres to left/right, front/back as per the radius defined by the length/2 of each segment
-    genCone(root, waypoint, 1500, 1500, chargeNum);
-}
-
-void scol::genCone(glm::vec3 root, glm::vec3 waypoint, float height, float maxRad, int chargeNum) {
-    std::default_random_engine generator;
-    std::uniform_real_distribution<float> rand(0.f, 1.f);
-    auto genR = bind(rand, generator);
-
-    float y = 0.f;
-    float radius = 0.f;
-    float angle = 0.f;
     glm::mat3 transform(1);
+
+    glm::vec3 center = (waypoint + root) / 2.f;
 
     if (!glm::all(glm::equal(glm::normalize(waypoint - root), glm::vec3(0, 1, 0)))) {
         glm::vec3 new_y = glm::normalize(waypoint - root);
@@ -46,11 +37,99 @@ void scol::genCone(glm::vec3 root, glm::vec3 waypoint, float height, float maxRa
         transform = glm::mat3(new_x, new_y, new_z);
     }
 
+    float height = glm::distance(root, waypoint);
+
+    switch (genType){
+        case 1: genRect(root, transform, height, height/4, chargeNum); 
+            break;
+        case 2: genCyl(root, transform, height, height / 4, chargeNum);
+            break;
+        case 3: genPyr(root, transform, height, height / 4, chargeNum);
+            break;
+        case 4: genCone(root, transform, height, height / 4, chargeNum);
+            break;
+        case 5: genSphere(root, transform, height / 2, chargeNum);
+            break;
+        default: genSphere(center, transform, height / 2, chargeNum);
+            break;
+    }
+}
+
+void scol::genRect(glm::vec3 root, glm::mat3 transform, float height, float side, int chargeNum) {
+    std::default_random_engine generator;
+    std::uniform_real_distribution<float> rand(0.f, 1.f);
+    std::uniform_real_distribution<float> randXZ(-1.f, 1.f);
+    auto genR = bind(rand, generator);
+    auto genXZ = bind(randXZ, generator);
+
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+
+    for (int i = 0; i < chargeNum; i++) {
+        y = genR() * height; // calculate height
+        x = genXZ() * side; // Random side element * maximum side length * linear decrease
+        z = genXZ() * side; // Random side element * maximum side length * linear decrease
+        charges.push_back(root + (transform * glm::vec3(x, y, z)));
+    }
+}
+
+void scol::genCyl(glm::vec3 root, glm::mat3 transform, float height, float maxRad, int chargeNum) {
+    std::default_random_engine generator;
+    std::uniform_real_distribution<float> rand(0.f, 1.f);
+    auto genR = bind(rand, generator);
+
+    float y = 0.f;
+    float radius = 0.f;
+    float angle = 0.f;
+
     for (int i = 0; i < chargeNum; i++) {
         y = genR() * height;
-        radius = sqrt(genR()) * ((maxRad) * (y / maxRad)); // Random radius element * maximum radius for the disc
+        radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc * linear decrease
         angle = genR() * 2 * M_PI;
         charges.push_back(root + (transform * glm::vec3(radius * cos(angle), y, radius * sin(angle))));
+    }
+}
+
+void scol::genPyr(glm::vec3 root, glm::mat3 transform, float height, float side, int chargeNum) {
+    std::default_random_engine generator;
+    std::uniform_real_distribution<float> rand(0.f, 1.f);
+    std::uniform_real_distribution<float> randXZ(-1.f, 1.f);
+    auto genR = bind(rand, generator);
+    auto genXZ = bind(randXZ, generator);
+
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+
+    for (int i = 0; i < chargeNum; i++) {
+        y = genR(); // calculate height
+        x = genXZ() * side * y; // Random side element * maximum side length * linear decrease
+        z = genXZ() * side * y; // Random side element * maximum side length * linear decrease
+        charges.push_back(root + (transform * glm::vec3(x, y * height, z)));
+    }
+}
+
+void scol::genCone(glm::vec3 root, glm::mat3 transform, float height, float maxRad, int chargeNum) {
+    std::default_random_engine generator;
+    std::uniform_real_distribution<float> rand(0.f, 1.f);
+    auto genR = bind(rand, generator);
+
+    float y = 0.f;
+    float radius = 0.f;
+    float angle = 0.f;
+
+    for (int i = 0; i < chargeNum; i++) {
+        y = genR();
+        radius = sqrt(genR()) * maxRad * y; // Random radius element * maximum radius for the disc * linear decrease
+        angle = genR() * 2 * M_PI;
+        charges.push_back(root + (transform * glm::vec3(radius * cos(angle), y * height, radius * sin(angle))));
+    }
+}
+
+void scol::genSphere(glm::vec3 center, glm::mat3 transform, float maxRad, int chargeNum) {
+    for (int i = 0; i < chargeNum; i++) {
+        charges.push_back(center + (transform * glm::ballRand(maxRad)));
     }
 }
 
