@@ -1,6 +1,7 @@
 #pragma once
 #include <glm.hpp>
 #include <../glm/gtx/rotate_vector.hpp>
+#include <../glm/gtc/random.hpp>
 #include <glbinding/gl/gl.h>
 
 #define M_PI 3.14159
@@ -76,11 +77,14 @@ public:
     std::vector<glm::vec3> getVertices();
     std::vector<unsigned int> getIndices();
 
-    void init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> ways);
+    void init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> ways, int genType);
     void grow();
-    void genCharges(glm::vec3 root, glm::vec3 way, int sphereNum, int chargeNum);
-    void genPyr(glm::vec3 root, float height, float side, int chargeNum);
-    void genCone(glm::vec3 root, glm::vec3 waypoint, float height, float maxRad, int chargeNum);
+    void genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int chargeNum, int genType);
+    void genRect(glm::vec3 root, glm::mat3 transform, float height, float maxRad, int chargeNum);
+    void genCyl(glm::vec3 root, glm::mat3 transform, float height, float maxRad, int chargeNum);
+    void genPyr(glm::vec3 root, glm::mat3 transform, float height, float side, int chargeNum);
+    void genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad, int chargeNum);
+    void genSphere(glm::vec3 root, glm::mat3 transform, float maxRad, int chargeNum);
     glm::vec3 randdir(glm::vec3 vec);
     bool updateAttractors();
 };

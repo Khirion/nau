@@ -178,7 +178,7 @@ PassLightning::prepare(void) {
 		sCol = scol();
         sCol.init(m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
 			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("SPHERES")->getId()],
-			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
+			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints, m_IntProps[Attribs.get("genType")->getId()]);
 		prepareGeometry();
 	}
 	
@@ -186,7 +186,7 @@ PassLightning::prepare(void) {
 		sCol = scol();
 		sCol.init(m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
 			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("SPHERES")->getId()],
-			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints);
+			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints, m_IntProps[Attribs.get("genType")->getId()]);
 		restartGeometry();
 	}
 
