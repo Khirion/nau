@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<project name="Lightning" >
+	<assets>
+		<attributes>
+            <attribute type="PASS" name="CHARGES" data="INT" value="8000" />
+			<attribute type="PASS" name="SPHERES" data="INT" value="1" />
+			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="50" />
+			<attribute type="PASS" name="KILL_DST" data="FLOAT" value="8" />
+			<attribute type="PASS" name="ATT_DST" data="FLOAT" value="100" />
+            <attribute type="PASS" name="genType" data="INT" value="1" />			
+			<attribute type="PASS" name="RESTART" data="BOOL" value="False"/>
+       </attributes>
+
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="1.0" g="1.0" b="1.0" />
+			</viewport>
+		</viewports>
+
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<TYPE value="PERSPECTIVE"/>
+				<FOV value = "60"/>
+				<NEAR value= "1"/>
+				<FAR value= "1000000"/>
+        <POSITION x="0" y="1250" z="-3000" />
+        <LOOK_AT_POINT x="0" y="0" z="0" />
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun">
+				<DIRECTION x="-2" y="-1" z="-2" />
+				<COLOR r="0.9" g="0.9" b="0.9" />
+			</light>
+		</lights>
+
+		<materialLibs>
+			<materialLib filename="waypoints.mlib" />
+		</materialLibs>
+	</assets>
+
+	<pipelines>
+		<pipeline name="lightning" default="true">
+			<pass class="lightningPI" name="lightning">
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+			</pass>
+		</pipeline>
+	</pipelines>
+
+	<interface>
+        <window label="settings">
+			<var label="Number of Charges" type="PASS" context="lightning#lightning" component="CHARGES"/>
+			<var label="Number of Spheres" type="PASS" context="lightning#lightning" component="SPHERES"/>
+			<var label="Growth Length of Segments" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
+			<var label="Kill Distance for Attractors" type="PASS" context="lightning#lightning" component="KILL_DST"/>
+			<var label="Attraction Distance for Attractors" type="PASS" context="lightning#lightning" component="ATT_DST"/>
+			<var label="Type of 3D Charge Distribution" type="PASS" context="lightning#lightning" component="genType"/>			
+			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
+		</window>
+    </interface>
+</project>
