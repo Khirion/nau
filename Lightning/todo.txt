@@ -1,1 +1,12 @@
-Focar num ramo principal com fios pequenos, depois tratar do resto.
+- Peso a cresecer com a diminuicao da altura
+- Ramifcacoes (codigo a parte)
+- Visualizacao (lighting, formacao etc).
+
+- Parameterizacao de Trovoes
+- Waypoints
+- Distribuicao de cargas
+
+> Setembro
+
+- Rendering
+- Escrever
