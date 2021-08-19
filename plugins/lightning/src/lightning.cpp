@@ -104,8 +104,8 @@ PassLightning::prepareGeometry() {
 	m_Renderable->setDrawingPrimitive(nau::render::IRenderable::LINES);
 
 	// fill in vertex array
-	vector<glm::vec3> vaux = sCol.getVertices();
-	vector<unsigned int> iaux = sCol.getIndices();
+	vector<glm::vec3> vaux = mBranch.getVertices();
+	vector<unsigned int> iaux = mBranch.getIndices();
 	size_t vertexCount = vaux.size();
 	
 	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
@@ -143,8 +143,8 @@ PassLightning::restartGeometry() {
 	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("Lightning");
 
 	// fill in vertex array
-	vector<glm::vec3> vaux = sCol.getVertices();
-	vector<unsigned int> iaux = sCol.getIndices();
+	vector<glm::vec3> vaux = mBranch.getVertices();
+	vector<unsigned int> iaux = mBranch.getIndices();
 	size_t vertexCount = vaux.size();
 
 	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
@@ -175,18 +175,26 @@ PassLightning::restartGeometry() {
 void
 PassLightning::prepare(void) {
 	if (!m_Inited) {
-		sCol = scol();
-        sCol.init(m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
-			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("SPHERES")->getId()],
-			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints, m_IntProps[Attribs.get("genType")->getId()]);
+		mBranch = mainBranch(m_FloatProps[Attribs.get("KILL_DST")->getId()],
+							 m_FloatProps[Attribs.get("ATT_DST")->getId()],
+							 m_IntProps[Attribs.get("CHARGES")->getId()],
+							 m_IntProps[Attribs.get("WEIGHT")->getId()],
+							 m_FloatProps[Attribs.get("GCHANCE")->getId()],
+							 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+
+		mBranch.init(waypoints, m_IntProps[Attribs.get("GENTYPE")->getId()], m_IntProps[Attribs.get("WIDTH")->getId()]);
 		prepareGeometry();
 	}
 	
 	if (m_BoolProps[RESTART]) {
-		sCol = scol();
-		sCol.init(m_FloatProps[Attribs.get("KILL_DST")->getId()], m_FloatProps[Attribs.get("ATT_DST")->getId()],
-			m_IntProps[Attribs.get("CHARGES")->getId()], m_IntProps[Attribs.get("SPHERES")->getId()],
-			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()], waypoints, m_IntProps[Attribs.get("genType")->getId()]);
+		mBranch = mainBranch(m_FloatProps[Attribs.get("KILL_DST")->getId()], 
+							 m_FloatProps[Attribs.get("ATT_DST")->getId()],
+							 m_IntProps[Attribs.get("CHARGES")->getId()],
+							 m_IntProps[Attribs.get("WEIGHT")->getId()],
+							 m_FloatProps[Attribs.get("GCHANCE")->getId()],
+							 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+
+		mBranch.init(waypoints, m_IntProps[Attribs.get("GENTYPE")->getId()], m_IntProps[Attribs.get("WIDTH")->getId()]);
 		restartGeometry();
 	}
 

@@ -9,13 +9,13 @@
 #include "nau/geometry/mesh.h"
 #include "nau/enums.h"
 
-#include "scol.hpp"
+#include "mainbranch.hpp"
 
 class PassLightning : public Pass
 		{
 		protected:
 			int RESTART;
-			scol sCol;
+			mainBranch mBranch;
 			vector<glm::vec3> waypoints;
 			bool m_Inited;
 			void prepareGeometry();

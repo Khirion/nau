@@ -1,34 +1,28 @@
-#include "scol.hpp"
+#include "mainbranch.hpp"
 
-float killDistance;
-float attDistance;
-float growthLength;
-
-void scol::init(float killDst, float attDst, int chargeNum, int sphereNum, int gLength, std::vector<glm::vec3> waypoints, int genType){
+void mainBranch::init(std::vector<glm::vec3> waypoints, int genType, int width){
     if (waypoints.size() % 2)
         return;
 
-    growthLength = gLength;
-    killDistance = killDst * growthLength;
-    attDistance = attDst * growthLength;
-
-    tree.push_back(node(0, waypoints[0], glm::normalize(waypoints[1] - waypoints[0])));
+    tree.push_back(node(0, waypoints[0], glm::normalize(waypoints[1] - waypoints[0]), glm::vec3(0,-1,0)));
 
     for (int i = 0; i < waypoints.size() - 1; i += 2) {
+        bottom = (waypoints[i] + waypoints[i + 1])/2.f;
+        
         charges.push_back(waypoints[i+1]);
 
-        genCharges(waypoints[i], waypoints[i+1], sphereNum, chargeNum, genType);
+        genCharges(waypoints[i], waypoints[i+1], genType, width);
 
-        grow();
+        grow(waypoints[i+1]);
     }
 }
 
-void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int chargeNum, int genType) {
+void mainBranch::genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, int width) {
     // Random Engine - TBD
     // Divide the length between waypoints according to the amount of spheres to create, randomly assign spheres to left/right, front/back as per the radius defined by the length/2 of each segment
     glm::mat3 transform(1);
 
-    glm::vec3 center = (waypoint + root) / 2.f;
+    glm::vec3 center = (root + waypoint) / 2.f;
     glm::vec3 vector = glm::normalize(waypoint - root);
 
     if (!(vector.x == 0 && vector.z == 0)) {
@@ -45,22 +39,22 @@ void scol::genCharges(glm::vec3 root, glm::vec3 waypoint, int sphereNum, int cha
     float height = glm::distance(root, waypoint);
 
     switch (genType){
-        case 1: genRect(root, transform, height, height/4, chargeNum); 
+        case 1: genRect(root, transform, height, height / width); 
             break;
-        case 2: genCyl(root, transform, height, height / 4, chargeNum);
+        case 2: genCyl(root, transform, height, height / width);
             break;
-        case 3: genPyr(root, transform, height, height / 4, chargeNum);
+        case 3: genPyr(root, transform, height, height / width);
             break;
-        case 4: genCone(root, transform, height, height / 4, chargeNum);
+        case 4: genCone(root, transform, height, height / width);
             break;
-        case 5: genSphere(root, transform, height / 2, chargeNum);
+        case 5: genSphere(root, transform, height / width);
             break;
-        default: genSphere(center, transform, height / 2, chargeNum);
+        default: genSphere(center, transform, height / width);
             break;
     }
 }
 
-void scol::genRect(glm::vec3 root, glm::mat3 transform, float height, float side, int chargeNum) {
+void mainBranch::genRect(glm::vec3 root, glm::mat3 transform, float height, float side) {
     std::default_random_engine generator;
     std::uniform_real_distribution<float> rand(0.f, 1.f);
     std::uniform_real_distribution<float> randXZ(-1.f, 1.f);
@@ -79,7 +73,7 @@ void scol::genRect(glm::vec3 root, glm::mat3 transform, float height, float side
     }
 }
 
-void scol::genCyl(glm::vec3 root, glm::mat3 transform, float height, float maxRad, int chargeNum) {
+void mainBranch::genCyl(glm::vec3 root, glm::mat3 transform, float height, float maxRad) {
     std::default_random_engine generator;
     std::uniform_real_distribution<float> rand(0.f, 1.f);
     auto genR = bind(rand, generator);
@@ -91,12 +85,12 @@ void scol::genCyl(glm::vec3 root, glm::mat3 transform, float height, float maxRa
     for (int i = 0; i < chargeNum; i++) {
         y = genR() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc * linear decrease
-        angle = genR() * 2 * M_PI;
+        angle = genR() * 2 * pi;
         charges.push_back(root + (transform * glm::vec3(radius * cos(angle), y, radius * sin(angle))));
     }
 }
 
-void scol::genPyr(glm::vec3 root, glm::mat3 transform, float height, float side, int chargeNum) {
+void mainBranch::genPyr(glm::vec3 root, glm::mat3 transform, float height, float side) {
     std::default_random_engine generator;
     std::uniform_real_distribution<float> rand(0.f, 1.f);
     std::uniform_real_distribution<float> randXZ(-1.f, 1.f);
@@ -115,7 +109,7 @@ void scol::genPyr(glm::vec3 root, glm::mat3 transform, float height, float side,
     }
 }
 
-void scol::genCone(glm::vec3 root, glm::mat3 transform, float height, float maxRad, int chargeNum) {
+void mainBranch::genCone(glm::vec3 root, glm::mat3 transform, float height, float maxRad) {
     std::default_random_engine generator;
     std::uniform_real_distribution<float> rand(0.f, 1.f);
     auto genR = bind(rand, generator);
@@ -127,59 +121,33 @@ void scol::genCone(glm::vec3 root, glm::mat3 transform, float height, float maxR
     for (int i = 0; i < chargeNum; i++) {
         y = genR();
         radius = sqrt(genR()) * maxRad * y; // Random radius element * maximum radius for the disc * linear decrease
-        angle = genR() * 2 * M_PI;
+        angle = genR() * 2 * pi;
         charges.push_back(root + (transform * glm::vec3(radius * cos(angle), y * height, radius * sin(angle))));
     }
 }
 
-void scol::genSphere(glm::vec3 center, glm::mat3 transform, float maxRad, int chargeNum) {
+void mainBranch::genSphere(glm::vec3 center, glm::mat3 transform, float maxRad) {
     for (int i = 0; i < chargeNum; i++) {
         charges.push_back(center + (transform * glm::ballRand(maxRad)));
     }
 }
 
-/* Sphere beta
-    float center = 0;
-    sphereNum += 2;
-    float distance = glm::distance(root, waypoint) / sphereNum;
-    float length = distance / 4;
-
-    /*std::default_random_engine generator;
-    std::uniform_real_distribution<float> randDistance(0.0, distance);
-
-    std::uniform_real_distribution<float> randRadius(-length, length);
-
-    auto genDist = bind(randDistance,generator);
-    auto genRadius = bind(randRadius,generator);*/
-
-
-
-    /*for (int i = 0; i < (chargeNum / sphereNum); i++) {
-        charges.push_back(charge(glm::vec3(waypoint.x + genRadius(), waypoint.y - abs(genRadius()), waypoint.z + genRadius()), killDistance));
-        charges.push_back(charge(glm::vec3(root.x + genRadius(), root.y + abs(genRadius()), root.z + genRadius()), killDistance));
-    }
-
-    for (int i = 2; i < sphereNum; i++) {
-        center = (distance * i) + genDist();
-        glm::vec3 sphere = glm::vec3(genRadius(), center, genRadius());
-        for (int j = 0; j < chargeNum / sphereNum; j++) {
-            charges.push_back(charge(glm::vec3(sphere.x + genRadius(), sphere.y + genRadius(), sphere.z + genRadius()), killDistance));
-        }
-    }*/
-
-void scol::grow() {
+void mainBranch::grow(glm::vec3 end) {
     std::vector<node>::iterator n;
-    std::vector<node> buffer;
+    std::list<charge>::iterator c;
+    std::vector<node> buffer = std::vector<node>();
+    bool flag = true;
+    node child;
 
     // Initial Growth
    while (!updateAttractors() && !charges.empty()) {
         const node& curNode = tree.back();
-        node child = node(tree.size(), curNode.pos + (curNode.dir * growthLength), curNode.dir);
+        node child = node(tree.size(), curNode.pos + (curNode.dir * growthLength), curNode.dir, curNode.dir);
         tree.push_back(child);
     }
 
     // Space Colonization Growth
-    while (updateAttractors()) {
+    while (updateAttractors() && flag) {
         for (const charge& charge : charges) {
             if (charge.closestIndex != -1){
                 n = tree.begin() + charge.closestIndex;
@@ -188,48 +156,73 @@ void scol::grow() {
             }
         }
 
+        flag = checkDeletion(end);
+
         int i = 0;
 
         for (n = tree.begin(); n != tree.end(); n++, i++) {
-            if (n->attNum > 0) {
+            if (n->attNum > 1) {
                 n->dir = n->dir / n->attNum;
-                node child = node(i, n->pos + (n->dir * growthLength), glm::vec3(0,0,0));
+                n->attNum = 1;
+
+                if (i == lastNode) {
+                    child = node(i, n->pos + (normalize(n->dir) * growthLength), glm::vec3(0, -1, 0), normalize(n->dir));
+                    lastNode = tree.size() + buffer.size();
+                }
+                else if (std::count_if(tree.begin(), tree.end(), [i](node n) {return i == n.parentIndex; }) < 2)
+                    child = node(i, n->pos + (normalize(n->dir) * growthLength), glm::vec3(0, 0, 0), normalize(n->dir));
                 buffer.push_back(child);
             }
         }
+
         tree.insert(tree.end(), buffer.begin(), buffer.end());
         buffer.clear();
-        charges.remove_if([](charge x) {return x.reached; });
     }
 }
 
-bool scol::updateAttractors() {
-    std::vector<node>::iterator n;
+bool mainBranch::updateAttractors() {
+    std::default_random_engine generator;
+    std::uniform_real_distribution<float> rand(0.f, 1.f);
+    auto genR = bind(rand, generator);
+
     std::list<charge>::iterator c;
     bool flag = false;
     int i = 0;
     float dist;
 
-    for (n = tree.begin(); n != tree.end(); n++, i++) {
-        n->attNum = 0;
-        for (c = charges.begin(); c != charges.end(); c++) {
-            dist = glm::distance(n->pos, c->pos);
-            if (dist <= attDistance) {
-                if (dist <= killDistance)
-                    c->reached = true;
-
-                if (c->closestIndex == -1 || dist <= glm::distance(tree[c->closestIndex].pos, c->pos)) {
-                    flag = true;
-                    c->closestIndex = i;
+    for (const node &n : tree) {
+        dist = 1 - (glm::distance(n.pos, bottom) / glm::distance(tree[0].pos, bottom));
+        if (i == lastNode || genR() * dist * (weight) < growthChance) {
+            for (c = charges.begin(); c != charges.end(); c++) {
+                dist = glm::distance(n.pos, c->pos);
+                    if (dist <= attDistance && (c->closestIndex == -1 || dist <= glm::distance(tree[c->closestIndex].pos, c->pos))) {
+                        flag = true;
+                        c->closestIndex = i;
+                    }
                 }
             }
-        }
+        i += 1;
     }
-
     return flag;
 }
 
-glm::vec3 scol::randdir(glm::vec3 vec) {
+bool mainBranch::checkDeletion(glm::vec3 end) {
+    std::list<charge>::iterator c;
+
+    for (const node &n : tree) {
+        for (c = charges.begin(); c != charges.end(); c++) {
+            c->closestIndex = -1;
+            if (glm::distance(n.pos, c->pos) <= killDistance)
+                c->reached = true;
+        }
+    }
+
+    charges.remove_if([](charge x) {return x.reached; });
+
+    return charges.front() == end;
+}
+
+glm::vec3 mainBranch::randdir(glm::vec3 vec) {
     // Introduce jaggedness
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -244,7 +237,7 @@ glm::vec3 scol::randdir(glm::vec3 vec) {
     return vec;
 }
 
-std::vector<glm::vec3> scol::getVertices() {
+std::vector<glm::vec3> mainBranch::getVertices() {
     std::vector<glm::vec3> vertices;
     for (node n : tree) {
         vertices.push_back(n.pos);
@@ -253,7 +246,7 @@ std::vector<glm::vec3> scol::getVertices() {
     return vertices;
 }
 
-std::vector<unsigned int> scol::getIndices() {
+std::vector<unsigned int> mainBranch::getIndices() {
     std::vector<unsigned int> indices;
 
     for (int i = 1; i < tree.size(); i++) {
