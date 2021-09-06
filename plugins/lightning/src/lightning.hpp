@@ -10,6 +10,7 @@
 #include "nau/enums.h"
 
 #include "mainbranch.hpp"
+#include "branches.hpp"
 
 class PassLightning : public Pass
 		{
@@ -17,10 +18,13 @@ class PassLightning : public Pass
 			int RESTART;
 			mainBranch mBranch;
 			vector<glm::vec3> waypoints;
+			vector<glm::vec3> branchpoints;
 			bool m_Inited;
 			void prepareGeometry();
 			void restartGeometry();
 			void loadWaypoints();
+			void loadBranchpoints();
+			void genLightning(void);
 
 		public:
 			static std::shared_ptr<Pass> Create(const std::string& name);

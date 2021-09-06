@@ -2,13 +2,11 @@
 <project name="Lightning" >
 	<assets>
 		<attributes>			
-			<attribute type="PASS" name="KILL_DST" data="FLOAT" value="1.9" />
-			<attribute type="PASS" name="ATT_DST" data="FLOAT" value="2" />
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.1"/>
 			<attribute type="PASS" name="CHARGES" data="INT" value="10000" />
 			<attribute type="PASS" name="GCHANCE" data="FLOAT" value="0.5" />
 			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="50" />
 			<attribute type="PASS" name="WEIGHT" data="INT" value="1" />
-            <attribute type="PASS" name="GENTYPE" data="INT" value="2" />
 			<attribute type="PASS" name="WIDTH" data="INT" value="10" />			
 			<attribute type="PASS" name="RESTART" data="BOOL" value="False"/>
        </attributes>
@@ -40,6 +38,7 @@
 
 		<materialLibs>
 			<materialLib filename="waypoints.mlib" />
+			<materialLib filename="branchpoints.mlib" />
 		</materialLibs>
 	</assets>
 
@@ -56,14 +55,12 @@
 
 	<interface>
         <window label="settings">
-			<var label="Kill Distance for Attractors" type="PASS" context="lightning#lightning" component="KILL_DST"/>
-			<var label="Attraction Distance for Attractors" type="PASS" context="lightning#lightning" component="ATT_DST"/>
-			<var label="Number of Charges" type="PASS" context="lightning#lightning" component="CHARGES"/>
+			<var label="Complexity" type="PASS" context="lightning#lightning" component="CPLX" def="min=0 max=1 step=0.05"/>
+			<var label="Number of Electrical Charges" type="PASS" context="lightning#lightning" component="CHARGES"/>
 			<var label="Growth Chance for Branches" type="PASS" context="lightning#lightning" component="GCHANCE"/>			
 			<var label="Growth Length of Segments" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
-			<var label="Weight of Distance to Center for Branches" type="PASS" context="lightning#lightning" component="WEIGHT"/>
-			<var label="Type of 3D Charge Distribution" type="PASS" context="lightning#lightning" component="GENTYPE"/>
-			<var label="Height-Width Ratio" type="PASS" context="lightning#lightning" component="WIDTH"/>						
+			<var label="Growth Rate of Branches" type="PASS" context="lightning#lightning" component="WEIGHT"/>
+			<var label="Max Sideways Spread" type="PASS" context="lightning#lightning" component="WIDTH"/>						
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
 		</window>
     </interface>
