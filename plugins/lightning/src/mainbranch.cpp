@@ -1,19 +1,29 @@
 #include "mainbranch.hpp"
 
-void mainBranch::init(std::vector<glm::vec3> waypoints, int genType, int width){
+void mainBranch::init(std::vector<glm::vec3> waypoints, int width){
     if (waypoints.size() % 2)
         return;
 
-    tree.push_back(node(0, waypoints[0], glm::normalize(waypoints[1] - waypoints[0]), glm::vec3(0,-1,0)));
+    tree.push_back(node(0, waypoints[0], glm::normalize(waypoints[1] - waypoints[0])));
 
-    for (int i = 0; i < waypoints.size() - 1; i += 2) {
-        bottom = (waypoints[i] + waypoints[i + 1])/2.f;
+    middle = (waypoints[0] + waypoints[1]) / 2.f;
         
-        charges.push_back(waypoints[i+1]);
+    charges.push_back(waypoints[1]);
+    genCharges(waypoints[0], waypoints[1], 2, width);
+    grow(waypoints[1]);
 
-        genCharges(waypoints[i], waypoints[i+1], genType, width);
+    if (waypoints.size() > 2) {
+        glm::vec3 cPoint = glm::vec3(0);
+        for (int i = 1; i < waypoints.size() - 1; i++) {
+            cPoint = getClosest(waypoints[i]);
+            tree.push_back(node(tree.size(), cPoint, normalize(waypoints[i+1] - cPoint)));
 
-        grow(waypoints[i+1]);
+            middle = (cPoint + waypoints[i+1]) / 2.f;
+
+            charges.push_back(waypoints[i+1]);
+            genCharges(cPoint, waypoints[i+1], 2, width);
+            grow(waypoints[i+1]);
+        }
     }
 }
 
@@ -22,7 +32,6 @@ void mainBranch::genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, int
     // Divide the length between waypoints according to the amount of spheres to create, randomly assign spheres to left/right, front/back as per the radius defined by the length/2 of each segment
     glm::mat3 transform(1);
 
-    glm::vec3 center = (root + waypoint) / 2.f;
     glm::vec3 vector = glm::normalize(waypoint - root);
 
     if (!(vector.x == 0 && vector.z == 0)) {
@@ -47,9 +56,7 @@ void mainBranch::genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, int
             break;
         case 4: genCone(root, transform, height, height / width);
             break;
-        case 5: genSphere(root, transform, height / width);
-            break;
-        default: genSphere(center, transform, height / width);
+        default: genCyl(root, transform, height, height / width);
             break;
     }
 }
@@ -126,12 +133,6 @@ void mainBranch::genCone(glm::vec3 root, glm::mat3 transform, float height, floa
     }
 }
 
-void mainBranch::genSphere(glm::vec3 center, glm::mat3 transform, float maxRad) {
-    for (int i = 0; i < chargeNum; i++) {
-        charges.push_back(center + (transform * glm::ballRand(maxRad)));
-    }
-}
-
 void mainBranch::grow(glm::vec3 end) {
     std::vector<node>::iterator n;
     std::list<charge>::iterator c;
@@ -142,7 +143,7 @@ void mainBranch::grow(glm::vec3 end) {
     // Initial Growth
    while (!updateAttractors() && !charges.empty()) {
         const node& curNode = tree.back();
-        node child = node(tree.size(), curNode.pos + (curNode.dir * growthLength), curNode.dir, curNode.dir);
+        node child = node(tree.size() - 1, curNode.pos + (randdir(curNode.dir) * growthLength), curNode.dir);
         tree.push_back(child);
     }
 
@@ -166,11 +167,11 @@ void mainBranch::grow(glm::vec3 end) {
                 n->attNum = 1;
 
                 if (i == lastNode) {
-                    child = node(i, n->pos + (normalize(n->dir) * growthLength), glm::vec3(0, -1, 0), normalize(n->dir));
+                    child = node(i, n->pos + (normalize(n->dir) * growthLength), normalize(n->dir));
                     lastNode = tree.size() + buffer.size();
                 }
                 else if (std::count_if(tree.begin(), tree.end(), [i](node n) {return i == n.parentIndex; }) < 2)
-                    child = node(i, n->pos + (normalize(n->dir) * growthLength), glm::vec3(0, 0, 0), normalize(n->dir));
+                    child = node(i, n->pos + (normalize(n->dir) * growthLength), glm::vec3(0, 0, 0));
                 buffer.push_back(child);
             }
         }
@@ -178,6 +179,19 @@ void mainBranch::grow(glm::vec3 end) {
         tree.insert(tree.end(), buffer.begin(), buffer.end());
         buffer.clear();
     }
+}
+
+glm::vec3 mainBranch::randdir(glm::vec3 vec) {
+    // Introduce jaggedness
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::bernoulli_distribution d(0.25);
+
+    if (d(gen))
+        vec = glm::rotateX(vec, (d(gen) ? 16.f : -16.f));
+    if (d(gen))
+        vec = glm::rotateZ(vec, (d(gen) ? 16.f : -16.f));
+    return vec;
 }
 
 bool mainBranch::updateAttractors() {
@@ -188,11 +202,12 @@ bool mainBranch::updateAttractors() {
     std::list<charge>::iterator c;
     bool flag = false;
     int i = 0;
-    float dist;
+    float distWeight;
+    float dist = 0;
 
     for (const node &n : tree) {
-        dist = 1 - (glm::distance(n.pos, bottom) / glm::distance(tree[0].pos, bottom));
-        if (i == lastNode || genR() * dist * (weight) < growthChance) {
+        distWeight = 1 - (glm::distance(n.pos, middle) / glm::distance(tree[0].pos, middle));
+        if (i == lastNode || genR() * distWeight * (weight) < growthChance) {
             for (c = charges.begin(); c != charges.end(); c++) {
                 dist = glm::distance(n.pos, c->pos);
                     if (dist <= attDistance && (c->closestIndex == -1 || dist <= glm::distance(tree[c->closestIndex].pos, c->pos))) {
@@ -222,19 +237,22 @@ bool mainBranch::checkDeletion(glm::vec3 end) {
     return charges.front() == end;
 }
 
-glm::vec3 mainBranch::randdir(glm::vec3 vec) {
-    // Introduce jaggedness
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::bernoulli_distribution d(0.5);
+glm::vec3 mainBranch::getClosest(glm::vec3 pos) {
+    int index = 0;
+    float closestDist = FLT_MAX;
+    float dist = 0;
+    int i = 0;
 
-    if(d(gen))
-        vec = glm::rotateX(vec, (d(gen) ? 16.f : -16.f));
+    for (const node& n : tree) {
+        dist = glm::distance(n.pos, pos);
+        if (closestDist > dist) {
+            index = i;
+            closestDist = dist;
+        }
+        i += 1;
+    }
 
-    if(d(gen))
-        vec = glm::rotateZ(vec, (d(gen) ? 16.f : -16.f));
-
-    return vec;
+    return tree[index].pos;
 }
 
 std::vector<glm::vec3> mainBranch::getVertices() {
@@ -255,4 +273,13 @@ std::vector<unsigned int> mainBranch::getIndices() {
     }
 
     return indices;
+}
+
+void mainBranch::addVector(std::vector<node> vector) {
+    tree.insert(tree.end(), vector.begin(), vector.end());
+}
+
+int mainBranch::getSize()
+{
+    return tree.size();
 }

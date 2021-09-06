@@ -57,6 +57,7 @@ PassLightning::init() {
 	registerAndInitArrays(Attribs);
 
 	loadWaypoints();
+	loadBranchpoints();
 
 	m_Inited = false;
 	m_BoolProps[RESTART] = false;
@@ -73,6 +74,20 @@ PassLightning::loadWaypoints() {
 
 	for (int i = 0; i < bsize / 4; i += 3) {
 		waypoints.push_back(glm::vec3(data[i], data[i + 1], data[i + 2]));
+	}
+}
+
+void
+PassLightning::loadBranchpoints() {
+	IBuffer* aBuffer = RESOURCEMANAGER->getBuffer("Branchpoints::branchpoints");
+	unsigned int bsize = aBuffer->getPropui(IBuffer::SIZE);
+	float* data = (float*)malloc(bsize);
+	aBuffer->getData(0, bsize, data);
+
+	branchpoints = vector<glm::vec3>();
+
+	for (int i = 0; i < bsize / 4; i += 3) {
+		branchpoints.push_back(glm::vec3(data[i], data[i + 1], data[i + 2]));
 	}
 }
 
@@ -175,31 +190,51 @@ PassLightning::restartGeometry() {
 void
 PassLightning::prepare(void) {
 	if (!m_Inited) {
-		mBranch = mainBranch(m_FloatProps[Attribs.get("KILL_DST")->getId()],
-							 m_FloatProps[Attribs.get("ATT_DST")->getId()],
-							 m_IntProps[Attribs.get("CHARGES")->getId()],
-							 m_IntProps[Attribs.get("WEIGHT")->getId()],
-							 m_FloatProps[Attribs.get("GCHANCE")->getId()],
-							 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
-
-		mBranch.init(waypoints, m_IntProps[Attribs.get("GENTYPE")->getId()], m_IntProps[Attribs.get("WIDTH")->getId()]);
+		genLightning();
 		prepareGeometry();
 	}
 	
 	if (m_BoolProps[RESTART]) {
-		mBranch = mainBranch(m_FloatProps[Attribs.get("KILL_DST")->getId()], 
-							 m_FloatProps[Attribs.get("ATT_DST")->getId()],
-							 m_IntProps[Attribs.get("CHARGES")->getId()],
-							 m_IntProps[Attribs.get("WEIGHT")->getId()],
-							 m_FloatProps[Attribs.get("GCHANCE")->getId()],
-							 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
-
-		mBranch.init(waypoints, m_IntProps[Attribs.get("GENTYPE")->getId()], m_IntProps[Attribs.get("WIDTH")->getId()]);
+		genLightning();
 		restartGeometry();
 	}
 
 	prepareBuffers();
 	setupCamera();
+}
+
+void
+PassLightning::genLightning(void) {
+	mBranch = mainBranch(m_FloatProps[Attribs.get("CPLX")->getId()],
+		m_IntProps[Attribs.get("CHARGES")->getId()],
+		m_IntProps[Attribs.get("WEIGHT")->getId()],
+		m_FloatProps[Attribs.get("GCHANCE")->getId()],
+		m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+
+	mBranch.init(waypoints, m_IntProps[Attribs.get("WIDTH")->getId()]);
+
+	if (branchpoints.size() % 2)
+		return;
+
+	branch b;
+	std::pair<glm::vec3, glm::vec3> bway;
+	glm::vec3 startPoint;
+	std::vector<glm::vec3> mainTree;
+
+	for (int i = 0; i < branchpoints.size(); i += 2) {
+		startPoint = mBranch.getClosest(waypoints[0] + (glm::normalize(waypoints.back() - waypoints[0]) * branchpoints[i].x));
+		mainTree = mBranch.getVertices();
+
+		bway = std::pair<glm::vec3, glm::vec3>(startPoint, startPoint + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y));
+
+		b = branch(mBranch.getSize(), m_FloatProps[Attribs.get("CPLX")->getId()],
+			m_IntProps[Attribs.get("CHARGES")->getId()],
+			m_FloatProps[Attribs.get("GCHANCE")->getId()],
+			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+
+		b.init(bway, mainTree);
+		mBranch.addVector(b.getVector());
+	}
 }
 
 
