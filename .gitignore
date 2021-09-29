@@ -5,6 +5,7 @@
 *.suo
 *.sln.docstates
 imgui.ini
+Lightning/
 
 # Build results
 
