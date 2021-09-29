@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<project name="Lightning" >
+<project name="Lightning" width='1080' height='1080'>
 	<assets>
 		<attributes>			
 			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.1"/>
@@ -13,7 +13,7 @@
 
 		<viewports>
 			<viewport name="MainViewport">
-				<CLEAR_COLOR r="1.0" g="1.0" b="1.0" />
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
 			</viewport>
 		</viewports>
 
@@ -22,33 +22,41 @@
 				<viewport name="MainViewport" />
 				<TYPE value="PERSPECTIVE"/>
 				<FOV value = "60"/>
-				<NEAR value= "1"/>
+				<NEAR value= "0.001"/>
 				<FAR value= "1000000"/>
-        <POSITION x="0" y="1250" z="-3000" />
-        <LOOK_AT_POINT x="0" y="0" z="0" />
+				<POSITION x="0.0" y="875" z="-1750" />
+				<LOOK_AT_POINT x="0" y="825" z="0" />
 			</camera>
 		</cameras>
 		
 		<lights>
 			<light name="Sun">
 				<DIRECTION x="-2" y="-1" z="-2" />
-				<COLOR r="0.9" g="0.9" b="0.9" />
+				<COLOR r="0.1" g="0.1" b="0.1" />
 			</light>
 		</lights>
 
 		<materialLibs>
 			<materialLib filename="waypoints.mlib" />
 			<materialLib filename="branchpoints.mlib" />
+			<materialLib filename="lighting.mlib" />
 		</materialLibs>
 	</assets>
 
 	<pipelines>
-		<pipeline name="lightning" default="true">
-			<pass class="lightningPI" name="lightning">
+		<pipeline name="lightning" default="false">
+			<pass class="default" name="lightning">
+				<viewport name="MainViewport" />
 				<camera name="MainCamera" />
 				<lights>
 					<light name="Sun" />
 				</lights>
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="imgProc" toLibrary="Lighting" />
+				</materialMaps>
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
+				</materialMaps>
 			</pass>
 		</pipeline>
 	</pipelines>

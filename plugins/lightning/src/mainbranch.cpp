@@ -255,24 +255,46 @@ glm::vec3 mainBranch::getClosest(glm::vec3 pos) {
     return tree[index].pos;
 }
 
-std::vector<glm::vec3> mainBranch::getVertices() {
-    std::vector<glm::vec3> vertices;
-    for (node n : tree) {
-        vertices.push_back(n.pos);
-    }
+void mainBranch::makeMap() {
+    std::map<int, std::vector<int>>::iterator it;
+    int pInd;
+    std::vector<int> vect;
 
-    return vertices;
+    for (int i = 0; i < tree.size(); i++) {
+        pInd = tree[i].parentIndex;
+        it = parIndMap.find(pInd);
+
+        if (it == parIndMap.end()) {
+            vect.push_back(i);
+            parIndMap[pInd] = vect;
+            vect.clear();
+        }
+        
+        else {
+            vect = parIndMap[pInd];
+            vect.push_back(i);
+            parIndMap[pInd] = vect;
+            vect.clear();
+        }
+
+        vertices.push_back(tree[i].pos);
+    }
 }
 
-std::vector<unsigned int> mainBranch::getIndices() {
-    std::vector<unsigned int> indices;
+void mainBranch::makeIndexes() {
+    int n = 0;
+    vertices.clear();
+    indices.clear();
 
-    for (int i = 1; i < tree.size(); i++) {
-        indices.push_back(tree[i].parentIndex);
-        indices.push_back(i);
+    makeMap();
+
+    for (std::map<int, std::vector<int>>::iterator it = parIndMap.begin(); it != parIndMap.end(); it++) {
+        n = it->first;
+        for (int i : it->second) {
+            indices.push_back(n);
+            indices.push_back(i);
+        }
     }
-
-    return indices;
 }
 
 void mainBranch::addVector(std::vector<node> vector) {
@@ -282,4 +304,12 @@ void mainBranch::addVector(std::vector<node> vector) {
 int mainBranch::getSize()
 {
     return tree.size();
+}
+
+std::vector<glm::vec3> mainBranch::getVertices() {
+    return vertices;
+}
+
+std::vector<unsigned int> mainBranch::getIndices(){
+    return indices;
 }

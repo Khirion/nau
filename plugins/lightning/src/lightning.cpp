@@ -15,7 +15,7 @@
 #include <Windows.h>
 #endif
 
-static char className[] = "lightningPI";
+static char className[] = "lightning";
 
 #ifdef WIN32
 #define EXPORT __declspec(dllexport)
@@ -101,7 +101,7 @@ PassLightning::Create(const std::string& passName) {
 PassLightning::PassLightning(const std::string& passName) :
 	Pass(passName) {
 
-	m_ClassName = "lightningPI";
+	m_ClassName = "lightning";
 	init();
 }
 
@@ -112,10 +112,10 @@ PassLightning::~PassLightning(void) {
 
 void
 PassLightning::prepareGeometry() {
-	std::shared_ptr<IScene> m_Scene = RENDERMANAGER->createScene("Lightning", "Scene");
+	std::shared_ptr<IScene> m_Scene = RENDERMANAGER->createScene("lightning", "Scene");
 
 	// create a renderable
-	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->createRenderable("Mesh", "Lightning");
+	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->createRenderable("Mesh", "lightning");
 	m_Renderable->setDrawingPrimitive(nau::render::IRenderable::LINES);
 
 	// fill in vertex array
@@ -138,7 +138,7 @@ PassLightning::prepareGeometry() {
 	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(iaux);
 
 	// create the material group
-	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Emission Blue");
+	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Emission White");
 	aMaterialGroup->setIndexList(indices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
@@ -148,14 +148,14 @@ PassLightning::prepareGeometry() {
 
 	m_Scene->add(m_SceneObject);
 
-	addScene("Lightning");
+	addScene("lightning");
 
 	m_Inited = true;
 }
 
 void
 PassLightning::restartGeometry() {
-	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("Lightning");
+	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("lightning");
 
 	// fill in vertex array
 	vector<glm::vec3> vaux = mBranch.getVertices();
@@ -182,7 +182,7 @@ PassLightning::restartGeometry() {
 	aMaterialGroup->setIndexList(indices);
 	aMaterialGroup->resetCompilationFlag();
 
-	RENDERMANAGER->getScene("Lightning")->recompile();
+	RENDERMANAGER->getScene("lightning")->recompile();
 
 	m_BoolProps[RESTART] = false;
 }
@@ -235,6 +235,8 @@ PassLightning::genLightning(void) {
 		b.init(bway, mainTree);
 		mBranch.addVector(b.getVector());
 	}
+
+	mBranch.makeIndexes();
 }
 
 

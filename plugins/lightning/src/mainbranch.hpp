@@ -4,6 +4,7 @@
 #include <../glm/gtx/rotate_vector.hpp>
 
 #include <random>
+#include <map>
 #include <list>
 #include <vector>
 
@@ -11,6 +12,7 @@ class mainBranch {
     private:
         std::vector<node> tree;
         std::list<charge> charges;
+        std::map<int, std::vector<int>> parIndMap;
         glm::vec3 middle;
         int lastNode;
 
@@ -21,6 +23,9 @@ class mainBranch {
         int weight;
         float growthChance;
         float growthLength;
+
+        std::vector<glm::vec3> vertices;
+        std::vector<unsigned int> indices;
 
     public:
         mainBranch() {};
@@ -47,13 +52,18 @@ class mainBranch {
         void genPyr(glm::vec3 root, glm::mat3 transform, float height, float side);
         void genCone(glm::vec3 root, glm::mat3 transform, float height, float maxRad);
         void grow(glm::vec3 end);
+
+        void makeMap();
+        void makeIndexes();
+
         glm::vec3 randdir(glm::vec3 vec);
         glm::vec3 getClosest(glm::vec3 pos);
         bool updateAttractors();
         bool checkDeletion(glm::vec3 end);
 
-        std::vector<glm::vec3> getVertices();
-        std::vector<unsigned int> getIndices();
         void addVector(std::vector<node> vector);
         int getSize();
+
+        std::vector<glm::vec3> getVertices();
+        std::vector<unsigned int> getIndices();
 };
