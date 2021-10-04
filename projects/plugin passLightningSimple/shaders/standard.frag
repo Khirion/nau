@@ -1,4 +1,4 @@
-   #version 440
+#version 440
 
 uniform	vec4 diffuse;
 uniform	vec4 emission;

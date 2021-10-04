@@ -225,7 +225,7 @@ namespace nau
 			//
 			nau_API void setStencilClearValue(unsigned int value);
 			nau_API void setStencilFunc(Pass::StencilFunc f, int ref, unsigned int mask);
-			nau_API void setStencilOp(Pass::StencilOp sfail,
+			nau_API void setStencilOp(	Pass::StencilOp sfail,
 							Pass::StencilOp dfail, 
 							Pass::StencilOp dpass);
 

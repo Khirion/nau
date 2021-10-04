@@ -45,19 +45,16 @@
 
 	<pipelines>
 		<pipeline name="lightning" default="false">
-			<pass class="default" name="lightning">
+			<pass class="lightning" name="lightning">
 				<viewport name="MainViewport" />
 				<camera name="MainCamera" />
 				<lights>
 					<light name="Sun" />
 				</lights>
-				<materialMaps>
-					<map fromMaterial="__Quad" toMaterial="imgProc" toLibrary="Lighting" />
-				</materialMaps>
-				<materialMaps>
-					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
-				</materialMaps>
 			</pass>
+			<materialMaps>
+					<map fromMaterial="" toMaterial="test" toLibrary="Lighting" />
+			</materialMaps>
 		</pipeline>
 	</pipelines>
 
