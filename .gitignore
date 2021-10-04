@@ -5,7 +5,6 @@
 *.suo
 *.sln.docstates
 imgui.ini
-Lightning/
 
 # Build results
 
@@ -21,6 +20,7 @@ testModels/
 testProjects/
 releases/
 build*/
+Lightning/
 contrib/old.*/
 *.old
 
