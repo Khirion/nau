@@ -33,12 +33,12 @@ public:
         attDistance(2.0f * _growthLength),
         chargeNum(_chargeNum),
         growthChance(_growthChance),
-        growthLength(_growthLength)
+        growthLength(static_cast<float>(_growthLength))
     {};
 
     ~branch() {};
 
-    void init(std::pair<glm::vec3, glm::vec3> waypoints, const std::vector<glm::vec3>& mainTree);
+    void init(int pInd, std::pair<glm::vec3, glm::vec3> waypoints, const std::vector<glm::vec3>& mainTree);
     void genCharges(glm::vec3 root, glm::vec3 waypoint);
     void genCone(glm::vec3 root, glm::mat3 transform, float height, float maxRad);
     void grow(glm::vec3 end);

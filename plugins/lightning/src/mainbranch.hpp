@@ -40,13 +40,13 @@ class mainBranch {
             chargeNum(_chargeNum),
             weight(_weight),
             growthChance(_growthChance),
-            growthLength(_growthLength)
+            growthLength(static_cast<float>(_growthLength))
         {};
 
         ~mainBranch() {};
 
-        void init(std::vector<glm::vec3> waypoints, int width);
-        void genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, int width);
+        void init(std::vector<glm::vec3> waypoints, float width);
+        void genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, float width);
         void genRect(glm::vec3 root, glm::mat3 transform, float height, float maxRad);
         void genCyl(glm::vec3 root, glm::mat3 transform, float height, float maxRad);
         void genPyr(glm::vec3 root, glm::mat3 transform, float height, float side);
@@ -57,7 +57,7 @@ class mainBranch {
         void makeIndexes();
 
         glm::vec3 randdir(glm::vec3 vec);
-        glm::vec3 getClosest(glm::vec3 pos);
+        std::pair<int, glm::vec3> getClosest(glm::vec3 pos);
         bool updateAttractors();
         bool checkDeletion(glm::vec3 end);
 

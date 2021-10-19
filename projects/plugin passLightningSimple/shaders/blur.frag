@@ -1,23 +1,32 @@
 #version 440
 
+uniform writeonly image2D imageUnit;
 uniform sampler2D texUnit;
+
+uniform float timeCoef;
+uniform float time;
 
 in vec2 texCoordV;
 
-out vec4 res;
+uniform float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 void main() {
+	vec2 tex_offset = 1.0 / textureSize(texUnit, 0); // gets size of single texel
+    vec3 result = texture(texUnit, texCoordV).rgb * weight[0]; // current fragment's contribution
 
-	ivec2 texCoord = ivec2(texCoordV * 1080);
-	vec4 tl = texelFetchOffset(texUnit, texCoord, 0, ivec2(-1, -1));
-	vec4 tc = texelFetchOffset(texUnit, texCoord, 0, ivec2( 0,	-1));
-	vec4 tr = texelFetchOffset(texUnit, texCoord, 0, ivec2( 1, -1));
-	vec4 cl = texelFetchOffset(texUnit, texCoord, 0, ivec2(-1,	 0));
-	vec4 cc = texelFetchOffset(texUnit, texCoord, 0, ivec2( 0,  0));
-	vec4 cr = texelFetchOffset(texUnit, texCoord, 0, ivec2( 1,	 0));
-	vec4 bl = texelFetchOffset(texUnit, texCoord, 0, ivec2(-1,	 1));
-	vec4 bc = texelFetchOffset(texUnit, texCoord, 0, ivec2( 0,	 1));
-	vec4 br = texelFetchOffset(texUnit, texCoord, 0, ivec2( 1,  1));
-
-	res = (8 * cc - tl - tc - tr - cl - cr - bl - bc - br);
+    for(int j = 0; j < 5; j++){
+        for(int i = 1; i < 5; ++i)
+            {
+                result += texture(texUnit, texCoordV + vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
+                result += texture(texUnit, texCoordV - vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
+            }
+            
+        for(int i = 1; i < 5; ++i)
+            {
+                result += texture(texUnit, texCoordV + vec2(0.0, tex_offset.y * i)).rgb * weight[i];
+                result += texture(texUnit, texCoordV - vec2(0.0, tex_offset.y * i)).rgb * weight[i];
+            }
+    }
+    
+	imageStore(imageUnit, ivec2(texCoordV * 1400), vec4(result, 1.0));
 } 

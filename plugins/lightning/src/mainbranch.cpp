@@ -1,6 +1,6 @@
 #include "mainbranch.hpp"
 
-void mainBranch::init(std::vector<glm::vec3> waypoints, int width){
+void mainBranch::init(std::vector<glm::vec3> waypoints, float width){
     if (waypoints.size() % 2)
         return;
 
@@ -15,7 +15,7 @@ void mainBranch::init(std::vector<glm::vec3> waypoints, int width){
     if (waypoints.size() > 2) {
         glm::vec3 cPoint = glm::vec3(0);
         for (int i = 1; i < waypoints.size() - 1; i++) {
-            cPoint = getClosest(waypoints[i]);
+            cPoint = getClosest(waypoints[i]).second;
             tree.push_back(node(tree.size(), cPoint, normalize(waypoints[i+1] - cPoint)));
 
             middle = (cPoint + waypoints[i+1]) / 2.f;
@@ -27,9 +27,7 @@ void mainBranch::init(std::vector<glm::vec3> waypoints, int width){
     }
 }
 
-void mainBranch::genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, int width) {
-    // Random Engine - TBD
-    // Divide the length between waypoints according to the amount of spheres to create, randomly assign spheres to left/right, front/back as per the radius defined by the length/2 of each segment
+void mainBranch::genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, float width) {
     glm::mat3 transform(1);
 
     glm::vec3 vector = glm::normalize(waypoint - root);
@@ -47,18 +45,7 @@ void mainBranch::genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, int
 
     float height = glm::distance(root, waypoint);
 
-    switch (genType){
-        case 1: genRect(root, transform, height, height / width); 
-            break;
-        case 2: genCyl(root, transform, height, height / width);
-            break;
-        case 3: genPyr(root, transform, height, height / width);
-            break;
-        case 4: genCone(root, transform, height, height / width);
-            break;
-        default: genCyl(root, transform, height, height / width);
-            break;
-    }
+    genCone(waypoint, transform, height, height / (10/width));
 }
 
 void mainBranch::genRect(glm::vec3 root, glm::mat3 transform, float height, float side) {
@@ -127,9 +114,9 @@ void mainBranch::genCone(glm::vec3 root, glm::mat3 transform, float height, floa
 
     for (int i = 0; i < chargeNum; i++) {
         y = genR();
-        radius = sqrt(genR()) * maxRad * y; // Random radius element * maximum radius for the disc * linear decrease
+        radius = sqrt(genR()) * maxRad * (y); // Random radius element * maximum radius for the disc * linear decrease
         angle = genR() * 2 * pi;
-        charges.push_back(root + (transform * glm::vec3(radius * cos(angle), y * height, radius * sin(angle))));
+        charges.push_back(root + (-transform * glm::vec3(radius * cos(angle), y * height, radius * sin(angle))));
     }
 }
 
@@ -234,10 +221,13 @@ bool mainBranch::checkDeletion(glm::vec3 end) {
 
     charges.remove_if([](charge x) {return x.reached; });
 
+    if (charges.empty())
+        return false;
+
     return charges.front() == end;
 }
 
-glm::vec3 mainBranch::getClosest(glm::vec3 pos) {
+std::pair<int, glm::vec3> mainBranch::getClosest(glm::vec3 pos) {
     int index = 0;
     float closestDist = FLT_MAX;
     float dist = 0;
@@ -252,7 +242,7 @@ glm::vec3 mainBranch::getClosest(glm::vec3 pos) {
         i += 1;
     }
 
-    return tree[index].pos;
+    return std::pair<int, glm::vec3>(index, tree[index].pos);
 }
 
 void mainBranch::makeMap() {
@@ -282,17 +272,42 @@ void mainBranch::makeMap() {
 }
 
 void mainBranch::makeIndexes() {
-    int n = 0;
+    std::map<int, std::vector<int>>::iterator it;
+    std::vector<int> pQueue;
+    std::vector<int> vaux;
+    int parent = 0;
+
     vertices.clear();
     indices.clear();
 
     makeMap();
 
-    for (std::map<int, std::vector<int>>::iterator it = parIndMap.begin(); it != parIndMap.end(); it++) {
-        n = it->first;
-        for (int i : it->second) {
-            indices.push_back(n);
-            indices.push_back(i);
+    // Root Setup
+    it = parIndMap.begin();
+    parent = it->first;
+    vaux = it->second;
+    
+    for (int child : vaux) {
+        indices.push_back(parent);
+        indices.push_back(child);
+    }
+
+    pQueue.insert(pQueue.end(), vaux.begin(), vaux.end());
+
+    // Height-based Traversal
+    for (int key = 0; key < pQueue.size(); key++) {
+        it = parIndMap.find(pQueue[key]);
+        if (it != parIndMap.end()) {
+            parent = it->first;
+            vaux = it->second;
+
+            for (int child : vaux) {
+                indices.push_back(parent);
+                indices.push_back(child);
+            }
+
+            pQueue.insert(pQueue.end(), vaux.begin(), vaux.end());
+            parIndMap.erase(it);
         }
     }
 }

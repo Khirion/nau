@@ -52,6 +52,10 @@ getClassName() {
 void
 PassLightning::init() {
 	RESTART = Attribs.get("RESTART")->getId();
+	END = Attribs.get("END")->getId();
+	startTime = 0;
+	endTime = 5;
+	timer = 0;
 
 	PASSFACTORY->registerClass("lightning", Create);
 	registerAndInitArrays(Attribs);
@@ -61,18 +65,24 @@ PassLightning::init() {
 
 	m_Inited = false;
 	m_BoolProps[RESTART] = false;
+	m_IntProps[END] = 0;
 }
 
 void
 PassLightning::loadWaypoints() {
 	IBuffer* aBuffer = RESOURCEMANAGER->getBuffer("Waypoints::waypoints");
+
+	if (aBuffer == NULL) {
+		return;
+	}
+
 	unsigned int bsize = aBuffer->getPropui(IBuffer::SIZE);
 	float* data = (float*)malloc(bsize);
 	aBuffer->getData(0, bsize, data);
 
 	waypoints = vector<glm::vec3>();
 
-	for (int i = 0; i < bsize / 4; i += 3) {
+	for (unsigned int i = 0; i < bsize / 4; i += 3) {
 		waypoints.push_back(glm::vec3(data[i], data[i + 1], data[i + 2]));
 	}
 }
@@ -80,13 +90,18 @@ PassLightning::loadWaypoints() {
 void
 PassLightning::loadBranchpoints() {
 	IBuffer* aBuffer = RESOURCEMANAGER->getBuffer("Branchpoints::branchpoints");
+
+	if (aBuffer == NULL) {
+		return;
+	}
+
 	unsigned int bsize = aBuffer->getPropui(IBuffer::SIZE);
 	float* data = (float*)malloc(bsize);
 	aBuffer->getData(0, bsize, data);
 
 	branchpoints = vector<glm::vec3>();
 
-	for (int i = 0; i < bsize / 4; i += 3) {
+	for (unsigned int i = 0; i < bsize / 4; i += 3) {
 		branchpoints.push_back(glm::vec3(data[i], data[i + 1], data[i + 2]));
 	}
 }
@@ -159,7 +174,6 @@ PassLightning::restartGeometry() {
 
 	// fill in vertex array
 	vector<glm::vec3> vaux = mBranch.getVertices();
-	vector<unsigned int> iaux = mBranch.getIndices();
 	size_t vertexCount = vaux.size();
 
 	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
@@ -174,8 +188,21 @@ PassLightning::restartGeometry() {
 	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
 	vertexData->resetCompilationFlag();
 
+	m_BoolProps[RESTART] = false;
+}
+
+void
+PassLightning::iterateGeometry() {
+	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("lightning");
+	vector<unsigned int> iaux = mBranch.getIndices();
+
+	float partSize = iaux.size() / endTime;
+	unsigned int p = max(1, static_cast<unsigned int>(partSize * timer));
+
+	vector<unsigned int> subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
+
 	// create indices and fill the array
-	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(iaux);
+	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(subi);
 
 	// create the material group
 	std::shared_ptr<MaterialGroup> aMaterialGroup = m_Renderable->getMaterialGroups()[0];
@@ -183,21 +210,33 @@ PassLightning::restartGeometry() {
 	aMaterialGroup->resetCompilationFlag();
 
 	RENDERMANAGER->getScene("lightning")->recompile();
-
-	m_BoolProps[RESTART] = false;
 }
 
 void
 PassLightning::prepare(void) {
+	if (waypoints.empty())
+		return;
+
 	if (!m_Inited) {
 		genLightning();
 		prepareGeometry();
+		startTime = RENDERER->getPropf(RENDERER->TIMER) / CLOCKS_PER_SEC;
 	}
 	
 	if (m_BoolProps[RESTART]) {
+		m_IntProps[END] = 0;
 		genLightning();
 		restartGeometry();
+		startTime = RENDERER->getPropf(RENDERER->TIMER) / CLOCKS_PER_SEC;
 	}
+
+	timer = (RENDERER->getPropf(RENDERER->TIMER) / CLOCKS_PER_SEC) - startTime;
+
+	if (timer <= endTime) {
+		iterateGeometry();
+	}
+	else if (timer > endTime)
+		m_IntProps[END] = 1;
 
 	if (0 != m_RenderTarget && true == m_UseRT) {
 
@@ -223,28 +262,30 @@ PassLightning::genLightning(void) {
 		m_FloatProps[Attribs.get("GCHANCE")->getId()],
 		m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
 
-	mBranch.init(waypoints, m_IntProps[Attribs.get("WIDTH")->getId()]);
+	mBranch.init(waypoints, m_FloatProps[Attribs.get("WIDTH")->getId()]);
 
-	if (branchpoints.size() % 2)
+	if (branchpoints.size() % 2 || branchpoints.empty()) {
+		mBranch.makeIndexes();
 		return;
+	}
 
 	branch b;
 	std::pair<glm::vec3, glm::vec3> bway;
-	glm::vec3 startPoint;
+	std::pair<int, glm::vec3> startPoint;
 	std::vector<glm::vec3> mainTree;
 
-	for (int i = 0; i < branchpoints.size(); i += 2) {
+	for (unsigned int i = 0; i < branchpoints.size(); i += 2) {
 		startPoint = mBranch.getClosest(waypoints[0] + (glm::normalize(waypoints.back() - waypoints[0]) * branchpoints[i].x));
 		mainTree = mBranch.getVertices();
 
-		bway = std::pair<glm::vec3, glm::vec3>(startPoint, startPoint + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y));
+		bway = std::pair<glm::vec3, glm::vec3>(startPoint.second, startPoint.second + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y));
 
 		b = branch(mBranch.getSize(), m_FloatProps[Attribs.get("CPLX")->getId()],
 			m_IntProps[Attribs.get("CHARGES")->getId()],
 			m_FloatProps[Attribs.get("GCHANCE")->getId()],
 			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
 
-		b.init(bway, mainTree);
+		b.init(startPoint.first, bway, mainTree);
 		mBranch.addVector(b.getVector());
 	}
 
@@ -282,3 +323,6 @@ PassLightning::doPass(void) {
 
 	RENDERMANAGER->processQueue();
 }
+
+// float t = RENDERER->getPropf(RENDERER->TIMER);
+// unsigned int f = RENDERER->getPropui(RENDERER->FRAME_COUNT);

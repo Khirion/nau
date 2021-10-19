@@ -15,12 +15,17 @@
 class PassLightning : public Pass
 		{
 		protected:
-			int RESTART;
+			unsigned int RESTART;
+			unsigned int END;
+			float timer;
+			float startTime;
+			float endTime;
 			mainBranch mBranch;
 			vector<glm::vec3> waypoints;
 			vector<glm::vec3> branchpoints;
 			bool m_Inited;
 			void prepareGeometry();
+			void iterateGeometry();
 			void restartGeometry();
 			void loadWaypoints();
 			void loadBranchpoints();

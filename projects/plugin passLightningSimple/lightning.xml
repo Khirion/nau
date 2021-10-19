@@ -1,14 +1,16 @@
 <?xml version="1.0" ?>
-<project name="Lightning" width='1080' height='1080'>
+<project name="Lightning" width='1400' height='1400'>
 	<assets>
 		<attributes>			
-			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.1"/>
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.0"/>
 			<attribute type="PASS" name="CHARGES" data="INT" value="10000" />
 			<attribute type="PASS" name="GCHANCE" data="FLOAT" value="0.5" />
 			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="50" />
 			<attribute type="PASS" name="WEIGHT" data="INT" value="1" />
-			<attribute type="PASS" name="WIDTH" data="INT" value="10" />			
-			<attribute type="PASS" name="RESTART" data="BOOL" value="False"/>
+			<attribute type="PASS" name="WIDTH" data="FLOAT" value="10.0" />			
+			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
+			<attribute type="PASS" name="END" data="INT" value="0"/>
+			<attribute type="RENDERER" name="TIMECOEF" data="FLOAT" value="1.0" />
        </attributes>
 
 		<viewports>
@@ -38,23 +40,43 @@
 
 		<materialLibs>
 			<materialLib filename="waypoints.mlib" />
-			<materialLib filename="branchpoints.mlib" />
+			<!--<materialLib filename="branchpoints.mlib" /> -->
 			<materialLib filename="lighting.mlib" />
 		</materialLibs>
 	</assets>
 
 	<pipelines>
-		<pipeline name="lightning" default="false">
+		<pipeline name="lightning" default="true">
 			<pass class="lightning" name="lightning">
 				<viewport name="MainViewport" />
 				<camera name="MainCamera" />
 				<lights>
 					<light name="Sun" />
 				</lights>
+				<renderTarget name="scene" fromLibrary="Lighting" />
+				<injectionMaps>
+					<map toMaterial="*">
+						<shader fromMaterial ="brightColor" fromLibrary="Lighting" />
+					</map>
+				</injectionMaps>
 			</pass>
-			<materialMaps>
-					<map fromMaterial="" toMaterial="test" toLibrary="Lighting" />
-			</materialMaps>
+
+			<pass class="quad" name="process1" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="show" >
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toMaterial="blend" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
 		</pipeline>
 	</pipelines>
 
@@ -67,6 +89,7 @@
 			<var label="Growth Rate of Branches" type="PASS" context="lightning#lightning" component="WEIGHT"/>
 			<var label="Max Sideways Spread" type="PASS" context="lightning#lightning" component="WIDTH"/>						
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
+			<var label="Time Coefficient" type="RENDERER" context="CURRENT" component="TIMECOEF" def="min=0 max=1 step=0.001"/>
 		</window>
     </interface>
 </project>

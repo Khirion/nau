@@ -1,7 +1,7 @@
 #include "branches.hpp"
 
-void branch::init(std::pair<glm::vec3, glm::vec3> waypoints, const std::vector<glm::vec3>& mainTree) {
-    tree.push_back(node(mainIndex, waypoints.first, glm::normalize(waypoints.second - waypoints.first)));
+void branch::init(int pInd, std::pair<glm::vec3, glm::vec3> waypoints, const std::vector<glm::vec3>& mainTree) {
+    tree.push_back(node(pInd, waypoints.first, glm::normalize(waypoints.second - waypoints.first)));
 
     middle = (waypoints.first + waypoints.second) / 2.f;
 
@@ -12,8 +12,6 @@ void branch::init(std::pair<glm::vec3, glm::vec3> waypoints, const std::vector<g
 }
 
 void branch::genCharges(glm::vec3 root, glm::vec3 waypoint) {
-    // Random Engine - TBD
-    // Divide the length between waypoints according to the amount of spheres to create, randomly assign spheres to left/right, front/back as per the radius defined by the length/2 of each segment
     glm::mat3 transform(1);
 
     glm::vec3 vector = glm::normalize(waypoint - root);
