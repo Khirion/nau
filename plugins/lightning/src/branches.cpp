@@ -58,7 +58,7 @@ void branch::grow(glm::vec3 end) {
     // Initial Growth
     while (!updateAttractors() && !charges.empty()) {
         const node& curNode = tree.back();
-        node child = node(tree.size() - 1 + mainIndex, curNode.pos + (randdir(curNode.dir) * growthLength), curNode.dir);
+        node child = node(static_cast<int>(tree.size() - 1 + mainIndex), curNode.pos + (randdir(curNode.dir) * growthLength), curNode.dir);
         tree.push_back(child);
     }
 

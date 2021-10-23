@@ -52,10 +52,12 @@ getClassName() {
 void
 PassLightning::init() {
 	RESTART = Attribs.get("RESTART")->getId();
-	END = Attribs.get("END")->getId();
+	CONTROL = Attribs.get("CONTROL")->getId();
+	TIMECOEF = Attribs.get("TIMECOEF")->getId();
+	TIME = Attribs.get("TIME")->getId();
 	startTime = 0;
-	endTime = 5;
-	timer = 0;
+	stepTime = 0.2f;
+	m_FloatProps[TIME] = 0.f;
 
 	PASSFACTORY->registerClass("lightning", Create);
 	registerAndInitArrays(Attribs);
@@ -65,7 +67,9 @@ PassLightning::init() {
 
 	m_Inited = false;
 	m_BoolProps[RESTART] = false;
-	m_IntProps[END] = 0;
+	m_IntProps[CONTROL] = 0;
+	m_FloatProps[TIMECOEF] = 1.f;
+	m_FloatProps[TIME] = 0.f;
 }
 
 void
@@ -165,6 +169,8 @@ PassLightning::prepareGeometry() {
 
 	addScene("lightning");
 
+	m_IntProps[CONTROL] = 0;
+	timeCoef = m_FloatProps[TIMECOEF];
 	m_Inited = true;
 }
 
@@ -188,6 +194,8 @@ PassLightning::restartGeometry() {
 	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
 	vertexData->resetCompilationFlag();
 
+	m_IntProps[CONTROL] = 0;
+	timeCoef = m_FloatProps[TIMECOEF];
 	m_BoolProps[RESTART] = false;
 }
 
@@ -196,10 +204,35 @@ PassLightning::iterateGeometry() {
 	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("lightning");
 	vector<unsigned int> iaux = mBranch.getIndices();
 
-	float partSize = iaux.size() / endTime;
-	unsigned int p = max(1, static_cast<unsigned int>(partSize * timer));
+	float partSize = iaux.size() / stepTime;
+	unsigned int p = max(1, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
 
 	vector<unsigned int> subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
+
+	// create indices and fill the array
+	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(subi);
+
+	// create the material group
+	std::shared_ptr<MaterialGroup> aMaterialGroup = m_Renderable->getMaterialGroups()[0];
+	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->resetCompilationFlag();
+
+	RENDERMANAGER->getScene("lightning")->recompile();
+}
+
+void
+PassLightning::cleanGeometry() {
+	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("lightning");
+
+	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
+		std::shared_ptr<std::vector<VertexData::Attr>>(new std::vector<VertexData::Attr>(0));
+
+	std::shared_ptr<VertexData>& vertexData = m_Renderable->getVertexData();
+
+	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
+	vertexData->resetCompilationFlag();
+
+	vector<unsigned int> subi = vector<unsigned int>(0);
 
 	// create indices and fill the array
 	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(subi);
@@ -224,19 +257,20 @@ PassLightning::prepare(void) {
 	}
 	
 	if (m_BoolProps[RESTART]) {
-		m_IntProps[END] = 0;
 		genLightning();
 		restartGeometry();
 		startTime = RENDERER->getPropf(RENDERER->TIMER) / CLOCKS_PER_SEC;
 	}
 
-	timer = (RENDERER->getPropf(RENDERER->TIMER) / CLOCKS_PER_SEC) - startTime;
+	m_FloatProps[TIME] = ((RENDERER->getPropf(RENDERER->TIMER) / CLOCKS_PER_SEC) - startTime) * timeCoef;
 
-	if (timer <= endTime) {
+	if (m_FloatProps[TIME] <= stepTime)
 		iterateGeometry();
-	}
-	else if (timer > endTime)
-		m_IntProps[END] = 1;
+
+	if (m_IntProps[CONTROL] <= 5)
+		m_IntProps[CONTROL] = static_cast<int>(m_FloatProps[TIME] * 5) - 1;
+	else
+		cleanGeometry();
 
 	if (0 != m_RenderTarget && true == m_UseRT) {
 

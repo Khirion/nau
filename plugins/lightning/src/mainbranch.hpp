@@ -13,6 +13,8 @@ class mainBranch {
         std::vector<node> tree;
         std::list<charge> charges;
         std::map<int, std::vector<int>> parIndMap;
+        glm::vec3 root;
+        glm::vec3 end;
         glm::vec3 middle;
         int lastNode;
 
@@ -46,12 +48,12 @@ class mainBranch {
         ~mainBranch() {};
 
         void init(std::vector<glm::vec3> waypoints, float width);
-        void genCharges(glm::vec3 root, glm::vec3 waypoint, int genType, float width);
-        void genRect(glm::vec3 root, glm::mat3 transform, float height, float maxRad);
-        void genCyl(glm::vec3 root, glm::mat3 transform, float height, float maxRad);
-        void genPyr(glm::vec3 root, glm::mat3 transform, float height, float side);
-        void genCone(glm::vec3 root, glm::mat3 transform, float height, float maxRad);
-        void grow(glm::vec3 end);
+        void genCharges(float width);
+        void genRect(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
+        void genCyl(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
+        void genPyr(glm::vec3 center, glm::mat3 transform, float height, float side);
+        void genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
+        void grow();
 
         void makeMap();
         void makeIndexes();
@@ -59,7 +61,7 @@ class mainBranch {
         glm::vec3 randdir(glm::vec3 vec);
         std::pair<int, glm::vec3> getClosest(glm::vec3 pos);
         bool updateAttractors();
-        bool checkDeletion(glm::vec3 end);
+        bool checkDeletion();
 
         void addVector(std::vector<node> vector);
         int getSize();
