@@ -2,8 +2,6 @@
 
 uniform	vec4 diffuse;
 uniform vec4 emission;
-uniform float timeCoef;
-uniform float time;
 
 in vec3 normal;
 in vec3 l_dir;

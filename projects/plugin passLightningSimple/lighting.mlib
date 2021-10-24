@@ -51,12 +51,6 @@
 					<valueof uniform="l_dir" 
 							 type="LIGHT" context="Sun"
 							 component="DIRECTION" />
-					<valueof uniform="timeCoef" 
-							 type="RENDERER" context="CURRENT" 
-							 component="TIMECOEF" />
-					<valueof uniform="time"
-							 type="RENDERER" context="CURRENT" 
-							 component="TIMER" />
 				</values>
 			</shader>
 		</material>
@@ -70,12 +64,6 @@
 					<valueof uniform="imageUnit"	
 							 type="IMAGE_TEXTURE" context="CURRENT"
 							 id=1 component="UNIT" />
-					<valueof uniform="timeCoef" 
-							 type="RENDERER" context="CURRENT" 
-							 component="TIMECOEF" />
-					<valueof uniform="time"
-							 type="RENDERER" context="CURRENT" 
-							 component="TIMER" />
 				</values>
 			</shader>
 			<textures>
@@ -98,15 +86,15 @@
 					<valueof uniform="sceneUnit"		
 							 type="TEXTURE_BINDING" context="CURRENT"
 							 id=1 component="UNIT" />
+					<valueof uniform="time" 
+							 type="PASS" context="lightning#lightning"
+							 component="TIME" />
 					<valueof uniform="timeCoef" 
-							 type="RENDERER" context="CURRENT" 
+							 type="PASS" context="lightning#lightning"
 							 component="TIMECOEF" />
-					<valueof uniform="end" 
+					<valueof uniform="control" 
 							 type="PASS" context="lightning#lightning" 
-							 component="END" />
-					<valueof uniform="time"
-							 type="RENDERER" context="CURRENT" 
-							 component="TIMER" />		
+							 component="CONTROL" />	
 				</values>
 			</shader>
 			<textures>

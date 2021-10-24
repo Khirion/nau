@@ -3,9 +3,6 @@
 uniform writeonly image2D imageUnit;
 uniform sampler2D texUnit;
 
-uniform float timeCoef;
-uniform float time;
-
 in vec2 texCoordV;
 
 uniform float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
