@@ -61,7 +61,7 @@ class mainBranch {
         glm::vec3 randdir(glm::vec3 vec);
         std::pair<int, glm::vec3> getClosest(glm::vec3 pos);
         bool updateAttractors();
-        bool checkDeletion();
+        bool checkDeletion(const std::vector<node>& buffer);
 
         void addVector(std::vector<node> vector);
         int getSize();

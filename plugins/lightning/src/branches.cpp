@@ -9,7 +9,7 @@ void branch::init(int pInd, std::pair<glm::vec3, glm::vec3> waypoints, const std
     charges.push_back(waypoints.second);
     genCharges(waypoints.first, waypoints.second);
     checkTreeDel(mainTree);
-    grow(waypoints.second);
+    grow();
 }
 
 void branch::genCharges(glm::vec3 root, glm::vec3 waypoint) {
@@ -49,7 +49,7 @@ void branch::genCone(glm::vec3 center, glm::mat3 transform, float height, float 
     }
 }
 
-void branch::grow(glm::vec3 end) {
+void branch::grow() {
     std::vector<node>::iterator n;
     std::list<charge>::iterator c;
     std::vector<node> buffer = std::vector<node>();
@@ -57,12 +57,15 @@ void branch::grow(glm::vec3 end) {
     bool flag = true;
     node child;
 
+    flag = checkDeletion(tree);
+
     // Initial Growth
     while (!updateAttractors() && !charges.empty()) {
         const node& curNode = tree.back();
         tempPos = curNode.pos + (randdir(curNode.dir) * growthLength);
         node child = node(static_cast<int>(tree.size() - 1 + mainIndex), tempPos, glm::normalize(end - tempPos), false);
         tree.push_back(child);
+        flag = checkDeletion(std::vector<node>(1, child));
     }
 
     // Space Colonization Growth
@@ -75,8 +78,6 @@ void branch::grow(glm::vec3 end) {
             }
         }
 
-        flag = checkDeletion(end);
-
         int i = 0;
 
         for (n = tree.begin(); n != tree.end(); n++, i++) {
@@ -88,6 +89,7 @@ void branch::grow(glm::vec3 end) {
         }
 
         tree.insert(tree.end(), buffer.begin(), buffer.end());
+        flag = checkDeletion(buffer);
         buffer.clear();
     }
 }
@@ -126,10 +128,10 @@ bool branch::updateAttractors() {
     return flag;
 }
 
-bool branch::checkDeletion(glm::vec3 end) {
+bool branch::checkDeletion(const std::vector<node>& buffer) {
     std::list<charge>::iterator c;
 
-    for (const node& n : tree) {
+    for (const node& n : buffer) {
         for (c = charges.begin(); c != charges.end(); c++) {
             c->closestIndex = -1;
             if (glm::distance(n.pos, c->pos) <= killDistance)
@@ -138,6 +140,9 @@ bool branch::checkDeletion(glm::vec3 end) {
     }
 
     charges.remove_if([](charge x) {return x.reached; });
+
+    if (charges.empty())
+        return false;
 
     return charges.front() == end;
 }

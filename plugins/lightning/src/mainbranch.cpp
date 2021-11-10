@@ -133,12 +133,15 @@ void mainBranch::grow() {
     bool flag = true;
     node child;
 
+    flag = checkDeletion(tree);
+
     // Initial Growth
    while (!updateAttractors() && !charges.empty()) {
         const node& curNode = tree.back();
         tempPos = curNode.pos + (randdir(glm::normalize(curNode.dir + curNode.startDir)) * growthLength);
         node child = node(static_cast<int>(tree.size() - 1), tempPos, glm::normalize(end - tempPos), true);
         tree.push_back(child);
+        flag = checkDeletion(std::vector<node>(1, child));
     }
 
    lastNode = tree.size() - 1;
@@ -152,8 +155,6 @@ void mainBranch::grow() {
                 n->dir += glm::normalize(charge.pos - n->pos);
             }
         }
-
-        flag = checkDeletion();
 
         int i = 0;
 
@@ -175,6 +176,7 @@ void mainBranch::grow() {
             }
         }
         tree.insert(tree.end(), buffer.begin(), buffer.end());
+        flag = checkDeletion(buffer);
         buffer.clear();
     }
 }
@@ -217,10 +219,10 @@ bool mainBranch::updateAttractors() {
     return flag;
 }
 
-bool mainBranch::checkDeletion() {
+bool mainBranch::checkDeletion(const std::vector<node>& buffer) {
     std::list<charge>::iterator c;
 
-    for (const node &n : tree) {
+    for (const node &n : buffer) {
         for (c = charges.begin(); c != charges.end(); c++) {
             c->closestIndex = -1;
             if (glm::distance(n.pos, c->pos) <= killDistance)
