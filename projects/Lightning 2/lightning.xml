@@ -1,0 +1,134 @@
+<?xml version="1.0" ?>
+<project name="Lightning" width='1080' height='1080'>
+	<assets>
+		<attributes>			
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="1.0"/>
+			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1.0"/>
+			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="25" />
+			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
+			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
+			<attribute type="PASS" name="TIMECOEF" data="FLOAT" value="1.0" />
+			<attribute type="PASS" name="CONTROL" data="INT" value="0" />
+       </attributes>
+
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+			</viewport>
+		</viewports>
+
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<TYPE value="PERSPECTIVE"/>
+				<FOV value = "60"/>
+				<NEAR value= "0.001"/>
+				<FAR value= "1000000"/>
+				<POSITION x="0.0" y="875" z="-1750" />
+				<LOOK_AT_POINT x="0" y="825" z="0" />
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun">
+				<DIRECTION x="-2" y="-1" z="-2" />
+				<COLOR r="0.1" g="0.1" b="0.1" />
+			</light>
+		</lights>
+
+		<materialLibs>
+			<materialLib filename="waypoints.mlib" />
+			<!--<materialLib filename="branchpoints.mlib" /> -->
+			<materialLib filename="lighting.mlib" />
+		</materialLibs>
+	</assets>
+
+	<pipelines>
+		<pipeline name="lightning" default="true">
+			<pass class="lightning" name="lightning">
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<renderTarget name="scene" fromLibrary="Lighting" />
+				<injectionMaps>
+					<map toMaterial="*">
+						<shader fromMaterial ="brightColor" fromLibrary="Lighting" />
+					</map>
+				</injectionMaps>
+			</pass>
+
+			<pass class="quad" name="process1" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="show" >
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toMaterial="blend" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+		</pipeline>
+	</pipelines>
+
+	<!--<pipelines>
+		<pipeline name="lightning" default="true">
+			<pass class="lightning" name="lightning">
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<renderTarget name="scene" fromLibrary="Lighting" />
+				<materialMaps>
+					<map fromMaterial="__Emission Gray" toMaterial="brightColor" toLibrary="Lighting" />
+				</materialMaps>
+				<renderTarget name="branch" fromLibrary="Lighting" />
+				<materialMaps>
+					<map fromMaterial="__Emission White" toMaterial="branchColor" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="process1" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="process2" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="branchBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="show" >
+				<viewport name="MainViewport" />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toMaterial="blend" toLibrary="Lighting" />
+					<map fromMaterial="*" toMaterial="branchBlend" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+		</pipeline>
+	</pipelines>-->
+
+	<interface>
+        <window label="settings">
+			<var label="Complexity" type="PASS" context="lightning#lightning" component="CPLX" def="min=0.0 max=1.0 step=0.1"/>
+			<var label="Length of Segments" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
+			<var label="Possible Curvature" type="PASS" context="lightning#lightning" component="WIDTH" def="min=0.1 max=1.0 step=0.1"/>
+			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
+			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=2 step=0.01"/>
+		</window>
+    </interface>
+</project>

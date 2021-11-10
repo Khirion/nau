@@ -11,28 +11,27 @@ class branch {
 private:
     std::vector<node> tree;
     std::list<charge> charges;
+    glm::vec3 startDir;
     glm::vec3 middle;
     int mainIndex;
 
     float pi = (float)3.14159;
+    float cplx;
     float killDistance;
     float attDistance;
-    int chargeNum;
-    float growthChance;
     float growthLength;
 
 public:
     branch() {};
 
-    branch(int _mainIndex, float complexity, int _chargeNum, float _growthChance, int _growthLength) :
+    branch(int _mainIndex, float complexity, float _growthLength) :
         tree(std::vector<node>()),
         charges(std::list<charge>()),
         middle(glm::vec3(0, 0, 0)),
         mainIndex(_mainIndex),
-        killDistance((2.0f - complexity) * _growthLength),
-        attDistance(2.0f * _growthLength),
-        chargeNum(_chargeNum),
-        growthChance(_growthChance),
+        cplx(complexity),
+        killDistance(_growthLength),
+        attDistance(2.f * _growthLength),
         growthLength(static_cast<float>(_growthLength))
     {};
 

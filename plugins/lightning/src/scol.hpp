@@ -5,20 +5,26 @@ struct node {
     int parentIndex;
     glm::vec3 pos;
     glm::vec3 dir;
-    float attNum;
+    glm::vec3 startDir;
+    bool mainBranch;
+    unsigned int attNum;
 
     node() : // Root
         parentIndex(0),
         pos(glm::vec3(0, 1500, 0)),
         dir(glm::vec3(0, 0, 0)),
+        startDir(glm::vec3(0, 0, 0)),
+        mainBranch(false),    
         attNum(0)
     {};
 
-    node(int _parent, glm::vec3 _pos, glm:: vec3 _dir) :
+    node(int _parent, glm::vec3 _pos, glm::vec3 _startDir, bool _mainBranch) :
         parentIndex(_parent),
         pos(_pos),
-        dir(_dir),
-        attNum(1)
+        dir(glm::vec3(0, 0, 0)),
+        startDir(_startDir),
+        mainBranch(_mainBranch),
+        attNum(0)
     {};
 
     ~node() {}

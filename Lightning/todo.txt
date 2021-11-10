@@ -1,21 +1,15 @@
-- Peso a cresecer com a diminuicao da altura (done)
-- Ramifcacoes (codigo a parte) (Done)
-    - Em vez de waypoint, distancia no raio principal (Done)
-
-- Tweaking <-
-
-- Parameterizacao de Trovoes (done)
-- Waypoints (done)
-- Distribuicao de cargas (done)
-
-> Setembro
-
-- Visualizacao (lighting, formacao etc).
-- Rendering <-
-- Escrever <-
+> Novembro
+- Lower light level and bloom on offbranches
+- Webapp
 
 ---
 
-- Find a way to order the rendering of segments. (done)
-- Research gaussian blur. (done)
-- Implement blur and lighting.
+Dissertacao:
+Continuar a escrever
+
+Contextualizacao
+From SCol for Trees to SCol for Lightning
+Descrever o processo, nao o scol.
+Alteracoes necessarias.
+Estrutura.
+Etc.

@@ -139,7 +139,6 @@ PassLightning::prepareGeometry() {
 
 	// fill in vertex array
 	vector<glm::vec3> vaux = mBranch.getVertices();
-	vector<unsigned int> iaux = mBranch.getIndices();
 	size_t vertexCount = vaux.size();
 	
 	std::shared_ptr<std::vector<VertexData::Attr>> vertices =
@@ -154,10 +153,15 @@ PassLightning::prepareGeometry() {
 	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
 
 	// create indices and fill the array
-	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(iaux);
+	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(0);
 
-	// create the material group
+	// Main Indices
 	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Emission White");
+	aMaterialGroup->setIndexList(indices);
+	m_Renderable->addMaterialGroup(aMaterialGroup);
+
+	// Branch Indices
+	aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Emission Gray");
 	aMaterialGroup->setIndexList(indices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
@@ -202,18 +206,32 @@ PassLightning::restartGeometry() {
 void
 PassLightning::iterateGeometry() {
 	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("lightning");
-	vector<unsigned int> iaux = mBranch.getIndices();
 
+	vector<unsigned int> iaux = mBranch.getMIndices();
 	float partSize = iaux.size() / stepTime;
 	unsigned int p = max(1, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
-
 	vector<unsigned int> subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
 
+	// Main Branch
 	// create indices and fill the array
 	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(subi);
 
-	// create the material group
+	// Main Indices
 	std::shared_ptr<MaterialGroup> aMaterialGroup = m_Renderable->getMaterialGroups()[0];
+	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->resetCompilationFlag();
+
+	iaux = mBranch.getBIndices();
+	partSize = iaux.size() / stepTime;
+	p = max(0, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
+	subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
+
+	// Branch
+	// create indices and fill the array
+	indices = std::make_shared<std::vector<unsigned int>>(subi);
+
+	// Branch Indices
+	aMaterialGroup = m_Renderable->getMaterialGroups()[1];
 	aMaterialGroup->setIndexList(indices);
 	aMaterialGroup->resetCompilationFlag();
 
@@ -241,6 +259,12 @@ PassLightning::cleanGeometry() {
 	std::shared_ptr<MaterialGroup> aMaterialGroup = m_Renderable->getMaterialGroups()[0];
 	aMaterialGroup->setIndexList(indices);
 	aMaterialGroup->resetCompilationFlag();
+
+	// create the material group
+	aMaterialGroup = m_Renderable->getMaterialGroups()[1];
+	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->resetCompilationFlag();
+
 
 	RENDERMANAGER->getScene("lightning")->recompile();
 }
@@ -291,12 +315,10 @@ PassLightning::prepare(void) {
 void
 PassLightning::genLightning(void) {
 	mBranch = mainBranch(m_FloatProps[Attribs.get("CPLX")->getId()],
-		m_IntProps[Attribs.get("CHARGES")->getId()],
-		m_IntProps[Attribs.get("WEIGHT")->getId()],
-		m_FloatProps[Attribs.get("GCHANCE")->getId()],
-		m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+						 m_FloatProps[Attribs.get("WIDTH")->getId()],
+						 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
 
-	mBranch.init(waypoints, m_FloatProps[Attribs.get("WIDTH")->getId()]);
+	mBranch.init(waypoints);
 
 	if (branchpoints.size() % 2 || branchpoints.empty()) {
 		mBranch.makeIndexes();
@@ -314,10 +336,9 @@ PassLightning::genLightning(void) {
 
 		bway = std::pair<glm::vec3, glm::vec3>(startPoint.second, startPoint.second + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y));
 
-		b = branch(mBranch.getSize(), m_FloatProps[Attribs.get("CPLX")->getId()],
-			m_IntProps[Attribs.get("CHARGES")->getId()],
-			m_FloatProps[Attribs.get("GCHANCE")->getId()],
-			m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+		b = branch(mBranch.getSize(), 
+				   m_FloatProps[Attribs.get("CPLX")->getId()],
+				   m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
 
 		b.init(startPoint.first, bway, mainTree);
 		mBranch.addVector(b.getVector());

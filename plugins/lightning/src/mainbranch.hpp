@@ -13,42 +13,42 @@ class mainBranch {
         std::vector<node> tree;
         std::list<charge> charges;
         std::map<int, std::vector<int>> parIndMap;
+        glm::vec3 startDir;
         glm::vec3 root;
         glm::vec3 end;
         glm::vec3 middle;
         int lastNode;
 
         float pi = (float) 3.14159;
+        float cplx;
+        float width;
         float killDistance;
         float attDistance;
-        int chargeNum;
-        int weight;
-        float growthChance;
         float growthLength;
 
         std::vector<glm::vec3> vertices;
-        std::vector<unsigned int> indices;
+        std::vector<unsigned int> mainIndices;
+        std::vector<unsigned int> branchIndices;
 
     public:
         mainBranch() {};
 
-        mainBranch(float complexity, int _chargeNum, int _weight, float _growthChance, int _growthLength) :
+        mainBranch(float complexity, float _width, float _growthLength) :
             tree(std::vector<node>()),
             charges(std::list<charge>()),
             middle(glm::vec3(0, 0, 0)),
             lastNode(0),
-            killDistance((2.0f - complexity) * _growthLength),
-            attDistance(2.0f * _growthLength),
-            chargeNum(_chargeNum),
-            weight(_weight),
-            growthChance(_growthChance),
+            width(_width),
+            cplx(complexity * 0.5f),
+            killDistance(_growthLength),
+            attDistance(2.f * _growthLength),
             growthLength(static_cast<float>(_growthLength))
         {};
 
         ~mainBranch() {};
 
-        void init(std::vector<glm::vec3> waypoints, float width);
-        void genCharges(float width);
+        void init(std::vector<glm::vec3> waypoints);
+        void genCharges();
         void genRect(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
         void genCyl(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
         void genPyr(glm::vec3 center, glm::mat3 transform, float height, float side);
@@ -67,5 +67,6 @@ class mainBranch {
         int getSize();
 
         std::vector<glm::vec3> getVertices();
-        std::vector<unsigned int> getIndices();
+        std::vector<unsigned int> getMIndices();
+        std::vector<unsigned int> getBIndices();
 };
