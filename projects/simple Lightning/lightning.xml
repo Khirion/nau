@@ -51,10 +51,16 @@
 				<lights>
 					<light name="Sun" />
 				</lights>
-				<renderTarget name="scene" fromLibrary="Lighting" />
+				<renderTarget name="sceneTarget" fromLibrary="Lighting" />
 				<injectionMaps>
 					<map toMaterial="*">
-						<shader fromMaterial ="brightColor" fromLibrary="Lighting" />
+						<shader fromMaterial ="renderScene" fromLibrary="Lighting" />
+					</map>
+					<map toMaterial="__Bolt">
+						<shader fromMaterial ="mainColor" fromLibrary="Lighting" />
+					</map>
+					<map toMaterial="__Branch">
+						<shader fromMaterial ="branchColor" fromLibrary="Lighting" />
 					</map>
 				</injectionMaps>
 			</pass>
@@ -62,6 +68,12 @@
 			<pass class="quad" name="process1" >
 				<materialMaps>
 					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="process2" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="branchBlur" toLibrary="Lighting" />
 				</materialMaps>
 			</pass>
 

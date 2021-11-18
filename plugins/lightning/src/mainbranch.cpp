@@ -136,7 +136,7 @@ void mainBranch::grow() {
     flag = checkDeletion(tree);
 
     // Initial Growth
-   while (!updateAttractors() && !charges.empty()) {
+   while (!updateAttractors() && !charges.empty() && flag) {
         const node& curNode = tree.back();
         tempPos = curNode.pos + (randdir(glm::normalize(curNode.dir + curNode.startDir)) * growthLength);
         node child = node(static_cast<int>(tree.size() - 1), tempPos, glm::normalize(end - tempPos), true);
@@ -187,9 +187,11 @@ glm::vec3 mainBranch::randdir(glm::vec3 vec) {
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(0.5);
 
-    if (d(gen))
+    bool flag = d(gen);
+
+    if (flag)
         vec = glm::rotateX(vec, (d(gen) ? 16.f : -16.f));
-    if (d(gen))
+    else
         vec = glm::rotateZ(vec, (d(gen) ? 16.f : -16.f));
     return vec;
 }

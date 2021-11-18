@@ -1,11 +1,13 @@
-> Novembro
-- Lower light level and bloom on offbranches
+- Cena
 - Webapp
 
 ---
 
 Dissertacao:
 Continuar a escrever
+Mudar imagens de azul
+Mais imagens
+Descrever como divirgiu do scol tradicional
 
 Contextualizacao
 From SCol for Trees to SCol for Lightning

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<project name="Lightning" width='1080' height='1080'>
+<project name="Lightning" width='1024' height='1024'>
 	<assets>
 		<attributes>			
 			<attribute type="PASS" name="CPLX" data="FLOAT" value="1.0"/>
@@ -51,49 +51,18 @@
 				<lights>
 					<light name="Sun" />
 				</lights>
-				<renderTarget name="scene" fromLibrary="Lighting" />
+				<renderTarget name="sceneTarget" fromLibrary="Lighting" />
 				<injectionMaps>
 					<map toMaterial="*">
-						<shader fromMaterial ="brightColor" fromLibrary="Lighting" />
+						<shader fromMaterial ="renderScene" fromLibrary="Lighting" />
+					</map>
+					<map toMaterial="__Bolt">
+						<shader fromMaterial ="mainColor" fromLibrary="Lighting" />
+					</map>
+					<map toMaterial="__Branch">
+						<shader fromMaterial ="branchColor" fromLibrary="Lighting" />
 					</map>
 				</injectionMaps>
-			</pass>
-
-			<pass class="quad" name="process1" >
-				<materialMaps>
-					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
-				</materialMaps>
-			</pass>
-
-			<pass class="quad" name="show" >
-				<viewport name="MainViewport" />
-				<camera name="MainCamera" />
-				<lights>
-					<light name="Sun" />
-				</lights>
-				<materialMaps>
-					<map fromMaterial="*" toMaterial="blend" toLibrary="Lighting" />
-				</materialMaps>
-			</pass>
-		</pipeline>
-	</pipelines>
-
-	<!--<pipelines>
-		<pipeline name="lightning" default="true">
-			<pass class="lightning" name="lightning">
-				<viewport name="MainViewport" />
-				<camera name="MainCamera" />
-				<lights>
-					<light name="Sun" />
-				</lights>
-				<renderTarget name="scene" fromLibrary="Lighting" />
-				<materialMaps>
-					<map fromMaterial="__Emission Gray" toMaterial="brightColor" toLibrary="Lighting" />
-				</materialMaps>
-				<renderTarget name="branch" fromLibrary="Lighting" />
-				<materialMaps>
-					<map fromMaterial="__Emission White" toMaterial="branchColor" toLibrary="Lighting" />
-				</materialMaps>
 			</pass>
 
 			<pass class="quad" name="process1" >
@@ -116,11 +85,10 @@
 				</lights>
 				<materialMaps>
 					<map fromMaterial="*" toMaterial="blend" toLibrary="Lighting" />
-					<map fromMaterial="*" toMaterial="branchBlend" toLibrary="Lighting" />
 				</materialMaps>
 			</pass>
 		</pipeline>
-	</pipelines>-->
+	</pipelines>
 
 	<interface>
         <window label="settings">
@@ -128,7 +96,7 @@
 			<var label="Length of Segments" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
 			<var label="Possible Curvature" type="PASS" context="lightning#lightning" component="WIDTH" def="min=0.1 max=1.0 step=0.1"/>
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
-			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=2 step=0.01"/>
+			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=2 step=0.250"/>
 		</window>
     </interface>
 </project>

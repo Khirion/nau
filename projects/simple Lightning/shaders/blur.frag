@@ -25,5 +25,5 @@ void main() {
             }
     }
     
-	imageStore(imageUnit, ivec2(texCoordV * 1080), vec4(result, 1.0));
+	imageStore(imageUnit, ivec2(texCoordV * 1024), vec4(result, 1.0));
 } 

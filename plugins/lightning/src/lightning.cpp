@@ -156,12 +156,12 @@ PassLightning::prepareGeometry() {
 	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(0);
 
 	// Main Indices
-	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Emission White");
+	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Bolt");
 	aMaterialGroup->setIndexList(indices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
 	// Branch Indices
-	aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Emission Gray");
+	aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Branch");
 	aMaterialGroup->setIndexList(indices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
@@ -222,9 +222,13 @@ PassLightning::iterateGeometry() {
 	aMaterialGroup->resetCompilationFlag();
 
 	iaux = mBranch.getBIndices();
-	partSize = iaux.size() / stepTime;
-	p = max(0, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
-	subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
+	if (iaux.empty())
+		subi = vector<unsigned int>(1, (0,0,0));
+	else {
+		partSize = iaux.size() / stepTime;
+		p = max(0, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
+		subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
+	}
 
 	// Branch
 	// create indices and fill the array
