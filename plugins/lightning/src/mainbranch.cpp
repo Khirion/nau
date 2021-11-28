@@ -297,7 +297,7 @@ void mainBranch::makeIndexes() {
     makeMap();
 
     // Root Setup
-    it = parIndMap.begin();
+    it = parIndMap.find(0);
     parent = it->first;
     vaux = it->second;
     
@@ -311,8 +311,8 @@ void mainBranch::makeIndexes() {
             branchIndices.push_back(child);
         }
     }
-
     pQueue.insert(pQueue.end(), vaux.begin(), vaux.end());
+    parIndMap.erase(0);
 
     // Height-based Traversal
     for (int key = 0; key < pQueue.size(); key++) {

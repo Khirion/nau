@@ -174,7 +174,7 @@ PassLightning::prepareGeometry() {
 	addScene("lightning");
 
 	m_IntProps[CONTROL] = 0;
-	timeCoef = m_FloatProps[TIMECOEF];
+	timeCoef = m_FloatProps[TIMECOEF] * 0.1f;
 	m_Inited = true;
 }
 
@@ -199,7 +199,7 @@ PassLightning::restartGeometry() {
 	vertexData->resetCompilationFlag();
 
 	m_IntProps[CONTROL] = 0;
-	timeCoef = m_FloatProps[TIMECOEF];
+	timeCoef = m_FloatProps[TIMECOEF] * 0.1f;
 	m_BoolProps[RESTART] = false;
 }
 
