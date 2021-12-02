@@ -66,6 +66,8 @@ class mainBranch {
         void addVector(std::vector<node> vector);
         int getSize();
 
+        void noOrder();
+
         std::vector<glm::vec3> getVertices();
         std::vector<unsigned int> getMIndices();
         std::vector<unsigned int> getBIndices();

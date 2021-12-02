@@ -324,7 +324,7 @@ PassLightning::genLightning(void) {
 
 	mBranch.init(waypoints);
 
-	if (branchpoints.size() % 2 || branchpoints.empty()) {
+	if (branchpoints.size() % 2 != 0 || branchpoints.empty()) {
 		mBranch.makeIndexes();
 		return;
 	}
@@ -340,9 +340,7 @@ PassLightning::genLightning(void) {
 
 		bway = std::pair<glm::vec3, glm::vec3>(startPoint.second, startPoint.second + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y));
 
-		b = branch(mBranch.getSize(), 
-				   m_FloatProps[Attribs.get("CPLX")->getId()],
-				   m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+		b = branch(mBranch.getSize());
 
 		b.init(startPoint.first, bway, mainTree);
 		mBranch.addVector(b.getVector());
@@ -350,7 +348,7 @@ PassLightning::genLightning(void) {
 
 	mBranch.makeIndexes();
 }
-
+ 
 
 void
 PassLightning::restore(void) {

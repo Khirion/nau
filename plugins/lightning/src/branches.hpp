@@ -25,15 +25,14 @@ private:
 public:
     branch() {};
 
-    branch(int _mainIndex, float complexity, float _growthLength) :
+    branch(int _mainIndex) :
         tree(std::vector<node>()),
         charges(std::list<charge>()),
         middle(glm::vec3(0, 0, 0)),
         mainIndex(_mainIndex),
-        cplx(complexity * 0.5f),
-        killDistance(_growthLength),
-        attDistance(2.f * _growthLength),
-        growthLength(static_cast<float>(_growthLength))
+        killDistance(40),
+        attDistance(50),
+        growthLength(static_cast<float>(30))
     {};
 
     ~branch() {};

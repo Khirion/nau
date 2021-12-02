@@ -5,6 +5,7 @@ void branch::init(int pInd, std::pair<glm::vec3, glm::vec3> waypoints, const std
 
     middle = (waypoints.first + waypoints.second) / 2.f;
     startDir = glm::normalize(waypoints.second - waypoints.first);
+    end = waypoints.second;
 
     charges.push_back(waypoints.second);
     genCharges(waypoints.first, waypoints.second);
@@ -29,7 +30,7 @@ void branch::genCharges(glm::vec3 root, glm::vec3 waypoint) {
     }
 
     float height = glm::distance(root, waypoint);
-    genCone(root, transform, height, height/2);
+    genCone(root, transform, height, height/5);
 }
 
 void branch::genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad) {

@@ -244,15 +244,14 @@ std::pair<int, glm::vec3> mainBranch::getClosest(glm::vec3 pos) {
     int index = 0;
     float closestDist = FLT_MAX;
     float dist = 0;
-    int i = 0;
 
-    for (const node& n : tree) {
-        dist = glm::distance(n.pos, pos);
+
+    for(int i = 0; i < tree.size(); i++){
+        dist = glm::distance(tree[i].pos, pos);
         if (closestDist > dist) {
             index = i;
             closestDist = dist;
         }
-        i += 1;
     }
 
     return std::pair<int, glm::vec3>(index, tree[index].pos);
@@ -338,6 +337,8 @@ void mainBranch::makeIndexes() {
     }
 }
 
+
+
 void mainBranch::addVector(std::vector<node> vector) {
     tree.insert(tree.end(), vector.begin(), vector.end());
 }
@@ -345,6 +346,23 @@ void mainBranch::addVector(std::vector<node> vector) {
 int mainBranch::getSize()
 {
     return tree.size();
+}
+
+void mainBranch::noOrder() {
+    vertices.clear();
+    mainIndices.clear();
+    branchIndices.clear();
+    for(int i = 0; i < tree.size(); i++){
+        vertices.push_back(tree[i].pos);
+        if (tree[i].mainBranch) {
+            mainIndices.push_back(tree[i].parentIndex);
+            mainIndices.push_back(i);
+        }
+        else {
+            branchIndices.push_back(tree[i].parentIndex);
+            branchIndices.push_back(i);
+        }
+    }
 }
 
 std::vector<glm::vec3> mainBranch::getVertices() {
