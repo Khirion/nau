@@ -32,7 +32,7 @@ void main() {
         
         case 2:
             f *= 2.5;
-            outColor = vec4((texture(blurUnit,texCoordV).rgb * (f+0.5)) + (texture(branchUnit,texCoordV).rgb * (f)) + (texture(sceneUnit,texCoordV).rgb * (f+0.5), 1.0);
+            outColor = vec4((texture(blurUnit,texCoordV).rgb * (f+0.5)) + (texture(branchUnit,texCoordV).rgb * (f)) + (texture(sceneUnit,texCoordV).rgb * (f+0.5)), 1.0);
             break;
         
         case 3:
@@ -42,7 +42,7 @@ void main() {
         
         case 4:
             f *= 2.5;
-            outColor = vec4((texture(blurUnit,texCoordV).rgb * (f+0.5)) + (texture(branchUnit,texCoordV).rgb * (f)) + (texture(sceneUnit,texCoordV).rgb * (f+0.5), 1.0);
+            outColor = vec4((texture(blurUnit,texCoordV).rgb * (f+0.5)) + (texture(branchUnit,texCoordV).rgb * (f)) + (texture(sceneUnit,texCoordV).rgb * (f+0.5)), 1.0);
             break;
             
         case 5:
