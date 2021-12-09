@@ -168,7 +168,7 @@ void mainBranch::grow() {
                     child = node(i, tempPos, glm::normalize(end - tempPos), true);
                     lastNode = tree.size() + buffer.size();
                 }
-                else if (std::count_if(tree.begin(), tree.end(), [i](node n) {return i == n.parentIndex; }) < 2) {
+                else {
                     tempPos = n->pos + (glm::normalize(n->dir + n->startDir * 0.75f) * growthLength);
                     child = node(i, tempPos, glm::normalize(end - tempPos), false);
                 }
@@ -207,7 +207,7 @@ bool mainBranch::updateAttractors() {
     float dist = 0;
 
     for (const node &n : tree) {
-        if (i == lastNode || genR() < cplx) {
+        if (i == lastNode || (genR() < cplx && (std::count_if(tree.begin(), tree.end(), [i](node n) {return i == n.parentIndex; }) - n.mainBranch < cull))) {
             for (c = charges.begin(); c != charges.end(); c++) {
                 dist = glm::distance(n.pos, c->pos);
                     if (dist <= attDistance && (c->closestIndex == -1 || dist <= glm::distance(tree[c->closestIndex].pos, c->pos))) {
@@ -290,8 +290,7 @@ void mainBranch::makeIndexes() {
     int parent = 0;
 
     vertices.clear();
-    mainIndices.clear();
-    branchIndices.clear();
+    indices.clear();
 
     makeMap();
 
@@ -302,12 +301,12 @@ void mainBranch::makeIndexes() {
     
     for (int child : vaux) {
         if (tree[child].mainBranch) {
-            mainIndices.push_back(parent);
-            mainIndices.push_back(child);
+            indices.push_back(std::make_pair(1, parent));
+            indices.push_back(std::make_pair(1, child));
         }
         else {
-            branchIndices.push_back(parent);
-            branchIndices.push_back(child);
+            indices.push_back(std::make_pair(0, parent));
+            indices.push_back(std::make_pair(0, child));
         }
     }
     pQueue.insert(pQueue.end(), vaux.begin(), vaux.end());
@@ -322,12 +321,12 @@ void mainBranch::makeIndexes() {
 
             for (int child : vaux) {
                 if (tree[child].mainBranch) {
-                    mainIndices.push_back(parent);
-                    mainIndices.push_back(child);
+                    indices.push_back(std::make_pair(1, parent));
+                    indices.push_back(std::make_pair(1, child));
                 }
                 else {
-                    branchIndices.push_back(parent);
-                    branchIndices.push_back(child);
+                    indices.push_back(std::make_pair(0, parent));
+                    indices.push_back(std::make_pair(0, child));
                 }
             }
 
@@ -348,31 +347,24 @@ int mainBranch::getSize()
     return tree.size();
 }
 
-void mainBranch::noOrder() {
-    vertices.clear();
-    mainIndices.clear();
-    branchIndices.clear();
-    for(int i = 0; i < tree.size(); i++){
-        vertices.push_back(tree[i].pos);
-        if (tree[i].mainBranch) {
-            mainIndices.push_back(tree[i].parentIndex);
-            mainIndices.push_back(i);
-        }
-        else {
-            branchIndices.push_back(tree[i].parentIndex);
-            branchIndices.push_back(i);
-        }
-    }
-}
-
 std::vector<glm::vec3> mainBranch::getVertices() {
     return vertices;
 }
 
-std::vector<unsigned int> mainBranch::getMIndices(){
-    return mainIndices;
+unsigned int mainBranch::getIndiceSize(){
+    return indices.size();
 }
 
-std::vector<unsigned int> mainBranch::getBIndices() {
-    return branchIndices;
+std::pair<std::vector<unsigned int>, std::vector<unsigned int>> mainBranch::getIndices(float size) {
+    std::vector<unsigned int> mBranchi;
+    std::vector<unsigned int> branchi;
+
+    for (int i = 0; i < size; i++) {
+        if (indices[i].first)
+            mBranchi.push_back(indices[i].second);
+        else
+            branchi.push_back(indices[i].second);
+    }
+    
+    return std::make_pair(mBranchi, branchi);
 }

@@ -207,32 +207,26 @@ void
 PassLightning::iterateGeometry() {
 	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("lightning");
 
-	vector<unsigned int> iaux = mBranch.getMIndices();
-	float partSize = iaux.size() / stepTime;
-	unsigned int p = max(1, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
-	vector<unsigned int> subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
+	float partSize = mBranch.getIndiceSize()/ stepTime;
+	unsigned int ppart = max(1, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
+	vector<unsigned int> auxi, auxb = vector<unsigned int>(1, (0, 0, 0));
+	std::pair<std::vector<unsigned int>, std::vector<unsigned int>> indPair;
+	indPair = mBranch.getIndices(ppart);
+	auxi = indPair.first;
+	auxb = indPair.second;
 
 	// Main Branch
 	// create indices and fill the array
-	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(subi);
+	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(auxi);
 
 	// Main Indices
 	std::shared_ptr<MaterialGroup> aMaterialGroup = m_Renderable->getMaterialGroups()[0];
 	aMaterialGroup->setIndexList(indices);
 	aMaterialGroup->resetCompilationFlag();
 
-	iaux = mBranch.getBIndices();
-	if (iaux.empty())
-		subi = vector<unsigned int>(1, (0,0,0));
-	else {
-		partSize = iaux.size() / stepTime;
-		p = max(0, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
-		subi = vector<unsigned int>(iaux.begin(), iaux.begin() + p);
-	}
-
 	// Branch
 	// create indices and fill the array
-	indices = std::make_shared<std::vector<unsigned int>>(subi);
+	indices = std::make_shared<std::vector<unsigned int>>(auxb);
 
 	// Branch Indices
 	aMaterialGroup = m_Renderable->getMaterialGroups()[1];
@@ -320,7 +314,8 @@ void
 PassLightning::genLightning(void) {
 	mBranch = mainBranch(m_FloatProps[Attribs.get("CPLX")->getId()],
 						 m_FloatProps[Attribs.get("WIDTH")->getId()],
-						 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]);
+						 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()],
+						 m_IntProps[Attribs.get("BRANCH")->getId()]);
 
 	mBranch.init(waypoints);
 

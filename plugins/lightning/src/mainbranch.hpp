@@ -18,6 +18,7 @@ class mainBranch {
         glm::vec3 end;
         glm::vec3 middle;
         int lastNode;
+        int cull;
 
         float pi = (float) 3.14159;
         float cplx;
@@ -27,13 +28,12 @@ class mainBranch {
         float growthLength;
 
         std::vector<glm::vec3> vertices;
-        std::vector<unsigned int> mainIndices;
-        std::vector<unsigned int> branchIndices;
+        std::vector<std::pair<bool, unsigned int>> indices;
 
     public:
         mainBranch() {};
 
-        mainBranch(float complexity, float _width, float _growthLength) :
+        mainBranch(float complexity, float _width, float _growthLength, int _cull) :
             tree(std::vector<node>()),
             charges(std::list<charge>()),
             middle(glm::vec3(0, 0, 0)),
@@ -42,7 +42,8 @@ class mainBranch {
             cplx(complexity * 0.5f),
             killDistance(_growthLength),
             attDistance(2.f * _growthLength),
-            growthLength(static_cast<float>(_growthLength))
+            growthLength(static_cast<float>(_growthLength)),
+            cull(_cull)
         {};
 
         ~mainBranch() {};
@@ -66,9 +67,7 @@ class mainBranch {
         void addVector(std::vector<node> vector);
         int getSize();
 
-        void noOrder();
-
         std::vector<glm::vec3> getVertices();
-        std::vector<unsigned int> getMIndices();
-        std::vector<unsigned int> getBIndices();
+        unsigned int getIndiceSize();
+        std::pair<std::vector<unsigned int>, std::vector<unsigned int>> getIndices(float size);
 };
