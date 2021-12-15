@@ -4,7 +4,7 @@
 		<attributes>			
 			<attribute type="PASS" name="CPLX" data="FLOAT" value="1.0"/>
 			<attribute type="PASS" name="BRANCH" data="INT" value="1"/>
-			<attribute type="PASS" name="WIDTH" data="FLOAT" value="0.5"/>
+			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1.0"/>
 			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="25" />
 			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
 			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
@@ -39,7 +39,7 @@
 
 		<materialLibs>
 			<materialLib filename="waypoints.mlib" />
-			<!--<materialLib filename="branchpoints.mlib" /> -->
+			<!--<materialLib filename="branchpoints.mlib" />-->
 			<materialLib filename="lighting.mlib" />
 		</materialLibs>
 	</assets>

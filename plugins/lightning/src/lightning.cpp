@@ -89,6 +89,10 @@ PassLightning::loadWaypoints() {
 	for (unsigned int i = 0; i < bsize / 4; i += 3) {
 		waypoints.push_back(glm::vec3(data[i], data[i + 1], data[i + 2]));
 	}
+
+	if (waypoints.size() % 2){
+		return;
+	}
 }
 
 void
@@ -107,6 +111,10 @@ PassLightning::loadBranchpoints() {
 
 	for (unsigned int i = 0; i < bsize / 4; i += 3) {
 		branchpoints.push_back(glm::vec3(data[i], data[i + 1], data[i + 2]));
+	}
+
+	if (branchpoints.size() % 2) {
+		return;
 	}
 }
 
@@ -208,7 +216,7 @@ PassLightning::iterateGeometry() {
 	std::shared_ptr<nau::render::IRenderable>& m_Renderable = RESOURCEMANAGER->getRenderable("lightning");
 
 	float partSize = mBranch.getIndiceSize()/ stepTime;
-	unsigned int ppart = max(1, static_cast<unsigned int>(partSize * m_FloatProps[TIME]));
+	float ppart = max(1, (partSize * m_FloatProps[TIME]));
 	vector<unsigned int> auxi, auxb = vector<unsigned int>(1, (0, 0, 0));
 	std::pair<std::vector<unsigned int>, std::vector<unsigned int>> indPair;
 	indPair = mBranch.getIndices(ppart);
@@ -314,12 +322,12 @@ void
 PassLightning::genLightning(void) {
 	mBranch = mainBranch(m_FloatProps[Attribs.get("CPLX")->getId()],
 						 m_FloatProps[Attribs.get("WIDTH")->getId()],
-						 m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()],
+						 static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
 						 m_IntProps[Attribs.get("BRANCH")->getId()]);
 
 	mBranch.init(waypoints);
 
-	if (branchpoints.size() % 2 != 0 || branchpoints.empty()) {
+	if (branchpoints.size() % 2 || branchpoints.empty()) {
 		mBranch.makeIndexes();
 		return;
 	}
@@ -335,7 +343,10 @@ PassLightning::genLightning(void) {
 
 		bway = std::pair<glm::vec3, glm::vec3>(startPoint.second, startPoint.second + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y));
 
-		b = branch(mBranch.getSize());
+		b = branch(m_FloatProps[Attribs.get("CPLX")->getId()], 
+					mBranch.getSize(),
+					static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
+					branchpoints[i].z);
 
 		b.init(startPoint.first, bway, mainTree);
 		mBranch.addVector(b.getVector());

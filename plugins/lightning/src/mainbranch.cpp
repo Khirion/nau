@@ -1,9 +1,6 @@
 #include "mainbranch.hpp"
 
 void mainBranch::init(std::vector<glm::vec3> waypoints){
-    if (waypoints.size() % 2)
-        return;
-
     root = waypoints[0];
     end = waypoints[1];
     startDir = glm::normalize(end - root);
@@ -17,15 +14,17 @@ void mainBranch::init(std::vector<glm::vec3> waypoints){
     grow();
 
     if (waypoints.size() > 2) {
-        for (int i = 1; i < waypoints.size() - 1; i++) {
-            root = getClosest(waypoints[i]).second;
+        for (int i = 2; i < waypoints.size(); i+=2) {
+            std::pair<int, glm::vec3> tempp = getClosest(waypoints[i]);
+            root = tempp.second;
             end = waypoints[i + 1];
+            startDir = glm::normalize(end - root);
 
-            tree.push_back(node(static_cast<int>(tree.size()), root, startDir, true));
+            tree.push_back(node(tempp.first, root, startDir, true));
 
             middle = (root + end) / 2.f;
 
-            charges.push_back(end);
+            charges.push_front(end);
             genCharges();
             grow();
         }
@@ -50,11 +49,11 @@ void mainBranch::genCharges() {
 
     float height = glm::distance(root, end);
 
-    genCyl(end, transform, height, (height/6) * width);
+    genCyl(end, transform, height, height * width);
 }
 
 void mainBranch::genRect(glm::vec3 center, glm::mat3 transform, float height, float side) {
-    std::default_random_engine generator;
+    static std::default_random_engine generator;
     std::normal_distribution<float> rand(0.5, 0.25);
     std::normal_distribution<float> randXZ(0, 0.5);
     auto genR = bind(rand, generator);
@@ -73,24 +72,33 @@ void mainBranch::genRect(glm::vec3 center, glm::mat3 transform, float height, fl
 }
 
 void mainBranch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float maxRad) {
-    std::default_random_engine generator;
-    std::normal_distribution<float> rand(0.5, 0.5);
-    auto genR = bind(rand, generator);
+    static std::default_random_engine generator;
+    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    auto genR = bind(randG, generator);
 
     float y = 0.f;
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 10000; i++) {
-        y = genR() * height;
+    for (int i = 0; i < 100000; i++) {
+        y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
         charges.push_back(center + (transform * glm::vec3(radius * cos(angle), y, radius * sin(angle))));
     }
 }
 
+float mainBranch::biModal() {
+    static std::default_random_engine generator;
+    std::normal_distribution<float> randL(0.35, 0.25);
+    std::normal_distribution<float> randH(0.75, 0.25);
+    std::bernoulli_distribution randB(0.5);
+    
+    return(randB(generator) ? randL(generator) : randH(generator));
+}
+
 void mainBranch::genPyr(glm::vec3 center, glm::mat3 transform, float height, float side) {
-    std::default_random_engine generator;
+    static std::default_random_engine generator;
     std::normal_distribution<float> rand(0.5, 0.25);
     std::normal_distribution<float> randXZ(0, 0.5);
     auto genR = bind(rand, generator);
@@ -109,8 +117,8 @@ void mainBranch::genPyr(glm::vec3 center, glm::mat3 transform, float height, flo
 }
 
 void mainBranch::genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad) {
-    std::default_random_engine generator;
-    std::normal_distribution<float> rand(0.5, 0.5);
+    static std::default_random_engine generator;
+    std::normal_distribution<float> rand(0.5, 0.25);
     auto genR = bind(rand, generator);
 
     float y = 0.f;
@@ -149,7 +157,7 @@ void mainBranch::grow() {
     // Space Colonization Growth
     while (updateAttractors() && flag) {
         for (const charge& charge : charges) {
-            if (charge.closestIndex != -1){
+            if (charge.closestIndex > -1){
                 n = tree.begin() + charge.closestIndex;
                 n->attNum += 1;
                 n->dir += glm::normalize(charge.pos - n->pos);
@@ -164,12 +172,12 @@ void mainBranch::grow() {
                 n->attNum = 0;
 
                 if (i == lastNode) {
-                    tempPos = n->pos + (glm::normalize(n->dir * 0.75f + n->startDir) * growthLength);
+                    tempPos = n->pos + (glm::normalize((n->dir * 0.9f) + (n->startDir * 1.1f)) * growthLength);
                     child = node(i, tempPos, glm::normalize(end - tempPos), true);
                     lastNode = tree.size() + buffer.size();
                 }
                 else {
-                    tempPos = n->pos + (glm::normalize(n->dir + n->startDir * 0.75f) * growthLength);
+                    tempPos = n->pos + (glm::normalize((n->dir * 1.1f) + (n->startDir * 0.9f)) * growthLength);
                     child = node(i, tempPos, glm::normalize(end - tempPos), false);
                 }
                 buffer.push_back(child);
@@ -197,26 +205,26 @@ glm::vec3 mainBranch::randdir(glm::vec3 vec) {
 }
 
 bool mainBranch::updateAttractors() {
-    std::default_random_engine generator;
+    static std::default_random_engine generator;
     std::uniform_real_distribution<float> rand(0.f, 1.f);
     auto genR = bind(rand, generator);
 
     std::list<charge>::iterator c;
     bool flag = false;
-    int i = 0;
     float dist = 0;
+    int count = 0;
 
-    for (const node &n : tree) {
-        if (i == lastNode || (genR() < cplx && (std::count_if(tree.begin(), tree.end(), [i](node n) {return i == n.parentIndex; }) - n.mainBranch < cull))) {
+    for (int i = 0; i < tree.size(); i++) {
+        count = std::count_if(tree.begin(), tree.end(), [i](node n) {return (n.parentIndex == i); }) - tree[i].mainBranch;
+        if (i == lastNode || (genR() * std::max(1, count*2) < cplx && count < cull)) {
             for (c = charges.begin(); c != charges.end(); c++) {
-                dist = glm::distance(n.pos, c->pos);
+                dist = glm::distance(tree[i].pos, c->pos);
                     if (dist <= attDistance && (c->closestIndex == -1 || dist <= glm::distance(tree[c->closestIndex].pos, c->pos))) {
                         flag = true;
                         c->closestIndex = i;
                     }
                 }
             }
-        i += 1;
     }
     return flag;
 }

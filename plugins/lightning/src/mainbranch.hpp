@@ -37,9 +37,12 @@ class mainBranch {
             tree(std::vector<node>()),
             charges(std::list<charge>()),
             middle(glm::vec3(0, 0, 0)),
+            end(glm::vec3(0, 0, 0)),
+            root(glm::vec3(0, 0, 0)),
+            startDir(glm::vec3(0, 0, 0)),
             lastNode(0),
             width(_width),
-            cplx(complexity * 0.5f),
+            cplx(complexity * 0.875f),
             killDistance(_growthLength),
             attDistance(2.f * _growthLength),
             growthLength(static_cast<float>(_growthLength)),
@@ -58,6 +61,7 @@ class mainBranch {
 
         void makeMap();
         void makeIndexes();
+        float biModal();
 
         glm::vec3 randdir(glm::vec3 vec);
         std::pair<int, glm::vec3> getClosest(glm::vec3 pos);
