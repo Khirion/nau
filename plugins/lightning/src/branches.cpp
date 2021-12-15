@@ -44,7 +44,7 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 1000 * height; i++) {
+    for (int i = 0; i < 100 * height; i++) {
         y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
