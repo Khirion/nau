@@ -3,8 +3,8 @@
 	<assets>
 		<attributes>			
 			<attribute type="PASS" name="CPLX" data="FLOAT" value="1.0"/>
-			<attribute type="PASS" name="BRANCH" data="INT" value="1"/>
-			<attribute type="PASS" name="WIDTH" data="FLOAT" value="0.5"/>
+			<attribute type="PASS" name="BRANCH" data="INT" value="2"/>
+			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1.0"/>
 			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="25" />
 			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
 			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
@@ -25,8 +25,8 @@
 				<FOV value = "60"/>
 				<NEAR value= "0.001"/>
 				<FAR value= "1000000"/>
-				<POSITION x="0.0" y="875" z="-1750" />
-				<LOOK_AT_POINT x="0" y="825" z="0" />
+				<POSITION x="0.0" y="875" z="-1050" />
+				<LOOK_AT_POINT x="0" y="650" z="0" />
 			</camera>
 		</cameras>
 		

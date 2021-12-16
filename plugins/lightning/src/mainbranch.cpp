@@ -49,19 +49,19 @@ void mainBranch::genCharges() {
 
     float height = glm::distance(root, end);
 
-    genCyl(end, transform, height, height * width);
+    genCyl(end, transform, height, (height * width)/2);
 }
 
 void mainBranch::genRect(glm::vec3 center, glm::mat3 transform, float height, float side) {
     static std::default_random_engine generator;
-    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    std::uniform_real_distribution<float> randG(-1.f, 1.f);
     auto genR = bind(randG, generator);
 
     float x = 0.f;
     float y = 0.f;
     float z = 0.f;
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 250 * height; i++) {
         y = biModal() * height; // calculate height
         x = genR() * side; // Random side element * maximum side length * linear decrease
         z = genR() * side; // Random side element * maximum side length * linear decrease
@@ -97,7 +97,7 @@ float mainBranch::biModal() {
 
 void mainBranch::genPyr(glm::vec3 center, glm::mat3 transform, float height, float side) {
     static std::default_random_engine generator;
-    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    std::uniform_real_distribution<float> randG(-1.f, 1.f);
     auto genR = bind(randG, generator);
 
     float x = 0.f;
@@ -114,14 +114,14 @@ void mainBranch::genPyr(glm::vec3 center, glm::mat3 transform, float height, flo
 
 void mainBranch::genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad) {
     static std::default_random_engine generator;
-    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    std::uniform_real_distribution<float> randG(-1.f, 1.f);
     auto genR = bind(randG, generator);
 
     float y = 0.f;
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 250 * height; i++) {
         y = biModal();
         radius = sqrt(genR()) * maxRad * (y); // Random radius element * maximum radius for the disc * linear decrease
         angle = genR() * 2 * pi;
