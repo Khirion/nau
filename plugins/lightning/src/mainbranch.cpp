@@ -54,19 +54,17 @@ void mainBranch::genCharges() {
 
 void mainBranch::genRect(glm::vec3 center, glm::mat3 transform, float height, float side) {
     static std::default_random_engine generator;
-    std::normal_distribution<float> rand(0.5, 0.25);
-    std::normal_distribution<float> randXZ(0, 0.5);
-    auto genR = bind(rand, generator);
-    auto genXZ = bind(randXZ, generator);
+    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    auto genR = bind(randG, generator);
 
     float x = 0.f;
     float y = 0.f;
     float z = 0.f;
 
     for (int i = 0; i < 10000; i++) {
-        y = genR() * height; // calculate height
-        x = genXZ() * side; // Random side element * maximum side length * linear decrease
-        z = genXZ() * side; // Random side element * maximum side length * linear decrease
+        y = biModal() * height; // calculate height
+        x = genR() * side; // Random side element * maximum side length * linear decrease
+        z = genR() * side; // Random side element * maximum side length * linear decrease
         charges.push_back(center + (transform * glm::vec3(x, y, z)));
     }
 }
@@ -99,34 +97,32 @@ float mainBranch::biModal() {
 
 void mainBranch::genPyr(glm::vec3 center, glm::mat3 transform, float height, float side) {
     static std::default_random_engine generator;
-    std::normal_distribution<float> rand(0.5, 0.25);
-    std::normal_distribution<float> randXZ(0, 0.5);
-    auto genR = bind(rand, generator);
-    auto genXZ = bind(randXZ, generator);
+    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    auto genR = bind(randG, generator);
 
     float x = 0.f;
     float y = 0.f;
     float z = 0.f;
 
-    for (int i = 0; i < 10000; i++) {
-        y = genR(); // calculate height
-        x = genXZ() * side * y; // Random side element * maximum side length * linear decrease
-        z = genXZ() * side * y; // Random side element * maximum side length * linear decrease
+    for (int i = 0; i < 250 * height; i++) {
+        y = biModal();
+        x = genR() * side * y; // Random side element * maximum side length * linear decrease
+        z = genR() * side * y; // Random side element * maximum side length * linear decrease
         charges.push_back(center + (transform * glm::vec3(x, y * height, z)));
     }
 }
 
 void mainBranch::genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad) {
     static std::default_random_engine generator;
-    std::normal_distribution<float> rand(0.5, 0.25);
-    auto genR = bind(rand, generator);
+    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    auto genR = bind(randG, generator);
 
     float y = 0.f;
     float radius = 0.f;
     float angle = 0.f;
 
     for (int i = 0; i < 10000; i++) {
-        y = genR();
+        y = biModal();
         radius = sqrt(genR()) * maxRad * (y); // Random radius element * maximum radius for the disc * linear decrease
         angle = genR() * 2 * pi;
         charges.push_back(center + (transform * glm::vec3(radius * cos(angle), y * height, radius * sin(angle))));
