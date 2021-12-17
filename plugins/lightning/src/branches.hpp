@@ -11,37 +11,33 @@ class branch {
 private:
     std::vector<node> tree;
     std::list<charge> charges;
-    glm::vec3 startDir;
-    glm::vec3 middle;
     glm::vec3 root;
     glm::vec3 end;
+    std::vector<glm::vec3> branchNodes;
     int mainIndex;
-    int lastNode;
+    int degree;
 
     float pi = (float)3.14159;
     float cplx;
     float killDistance;
     float attDistance;
     float growthLength;
-    int cull;
 
 public:
     branch() {};
 
-    branch(float complexity, int _mainIndex, float _growthLength, int _cull) :
+    branch(float complexity, int _mainIndex, float _growthLength, int _degree, int _cull) :
         tree(std::vector<node>()),
         charges(std::list<charge>()),
-        middle(glm::vec3(0, 0, 0)),
         end(glm::vec3(0, 0, 0)),
         root(glm::vec3(0, 0, 0)),
-        startDir(glm::vec3(0, 0, 0)),
-        lastNode(0),
+        branchNodes(std::vector<glm::vec3>()),
+        degree(_degree - _cull),
         mainIndex(_mainIndex),
         cplx(complexity * 0.875f),
         killDistance(_growthLength),
         attDistance(2.f * _growthLength),
-        growthLength(static_cast<float>(_growthLength)),
-        cull(_cull+1)
+        growthLength(static_cast<float>(_growthLength))
     {};
 
     ~branch() {};
@@ -53,7 +49,7 @@ public:
     void grow();
     glm::vec3 randdir(glm::vec3 vec);
     bool updateAttractors();
-    bool checkDeletion(const std::vector<node>& buffer);
+    bool checkDeletion(const node& n);
     void checkTreeDel(const std::vector<glm::vec3>& mainTree);
 
     std::vector<node> getVector();

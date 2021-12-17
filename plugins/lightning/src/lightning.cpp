@@ -161,16 +161,17 @@ PassLightning::prepareGeometry() {
 	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
 
 	// create indices and fill the array
-	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(0);
+	std::shared_ptr<std::vector<unsigned int>> mindices = std::make_shared<std::vector<unsigned int>>(0);
+	std::shared_ptr<std::vector<unsigned int>> bindices = std::make_shared<std::vector<unsigned int>>(0);
 
 	// Main Indices
 	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Bolt");
-	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->setIndexList(mindices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
 	// Branch Indices
 	aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Branch");
-	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->setIndexList(bindices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
 	std::shared_ptr<SceneObject>& m_SceneObject = nau::scene::SceneObjectFactory::Create("SimpleObject");
@@ -220,8 +221,10 @@ PassLightning::iterateGeometry() {
 	vector<unsigned int> auxi, auxb = vector<unsigned int>(1, (0, 0, 0));
 	std::pair<std::vector<unsigned int>, std::vector<unsigned int>> indPair;
 	indPair = mBranch.getIndices(ppart);
-	auxi = indPair.first;
-	auxb = indPair.second;
+	if (!indPair.first.empty())
+		auxi = indPair.first;
+	if(!indPair.second.empty())
+		auxb = indPair.second;
 
 	// Main Branch
 	// create indices and fill the array
@@ -346,6 +349,7 @@ PassLightning::genLightning(void) {
 		b = branch(m_FloatProps[Attribs.get("CPLX")->getId()], 
 					mBranch.getSize(),
 					static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
+					0,
 					branchpoints[i].z);
 
 		b.init(startPoint.first, bway, mainTree);
