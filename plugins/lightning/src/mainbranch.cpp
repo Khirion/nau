@@ -12,6 +12,7 @@ void mainBranch::init(std::vector<glm::vec3> waypoints){
 
     if (waypoints.size() > 2) {
         for (int i = 2; i < waypoints.size(); i+=2) {
+            charges.clear();
             std::pair<int, glm::vec3> tempp = getClosest(waypoints[i]);
             root = tempp.second;
             end = waypoints[i + 1];
@@ -72,7 +73,7 @@ void mainBranch::genCyl(glm::vec3 center, glm::mat3 transform, float height, flo
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 0 * height; i++) {
+    for (int i = 0; i < 250 * height; i++) {
         y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
@@ -135,7 +136,7 @@ void mainBranch::grow() {
     bool atts = false;
     node child;
 
-    while (flag && tree.back().pos.y > 0) {
+    while (flag) {
         atts = updateAttractors();
         const node& curNode = tree.back();
 
@@ -144,10 +145,10 @@ void mainBranch::grow() {
 
         // Scol Growth
         if(atts)
-            newPos = curNode.pos + (glm::normalize((curNode.dir * 0.4f) + (curNode.weightDir * 0.6f)) * growthLength);
+            newPos = curNode.pos + (glm::normalize((curNode.dir * (1.f-weight)) + (curNode.weightDir * weight)) * growthLength);
         //16 degree random growth
         else
-            newPos = curNode.pos + (glm::normalize(randdir(curNode.weightDir * 0.4f) + (curNode.weightDir * 0.6f)) * growthLength);
+            newPos = curNode.pos + (glm::normalize(randdir(curNode.weightDir * (1.f - weight)) + (curNode.weightDir * weight)) * growthLength);
 
         node child = node(static_cast<int>(tree.size() - 1), newPos, glm::normalize(end - newPos), true);
         tree.push_back(child);
@@ -309,6 +310,10 @@ void mainBranch::addVector(std::vector<node> vector) {
 int mainBranch::getSize()
 {
     return tree.size();
+}
+
+std::vector<glm::vec3> mainBranch::getVertices() {
+    return branchNodes;
 }
 
 std::vector<glm::vec3> mainBranch::getVertices() {

@@ -1,10 +1,12 @@
 <?xml version="1.0" ?>
-<project name="Lightning" width='1080' height='1080'>
+<project name="Lightning" width='1024' height='1024'>
 	<assets>
 		<attributes>			
-			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.0"/>
-			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1.0"/>
-			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="50" />
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="1.0"/>
+			<attribute type="PASS" name="BRANCH" data="INT" value="2"/>
+			<attribute type="PASS" name="WIDTH" data="FLOAT" value="0.1"/>
+			<attribute type="PASS" name="WEIGHT" data="FLOAT" value="0.1"/>
+			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="25" />
 			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
 			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
 			<attribute type="PASS" name="TIMECOEF" data="FLOAT" value="1.0" />
@@ -25,7 +27,7 @@
 				<NEAR value= "0.001"/>
 				<FAR value= "1000000"/>
 				<POSITION x="0.0" y="875" z="-1750" />
-				<LOOK_AT_POINT x="0" y="825" z="0" />
+				<LOOK_AT_POINT x="0" y="850" z="0" />
 			</camera>
 		</cameras>
 		
@@ -51,7 +53,6 @@
 				<lights>
 					<light name="Sun" />
 				</lights>
-				<renderTarget name="sceneTarget" fromLibrary="Lighting" />
 				<injectionMaps>
 					<map toMaterial="*">
 						<shader fromMaterial ="renderScene" fromLibrary="Lighting" />
@@ -64,39 +65,18 @@
 					</map>
 				</injectionMaps>
 			</pass>
-
-			<pass class="quad" name="process1" >
-				<materialMaps>
-					<map fromMaterial="__Quad" toMaterial="blur" toLibrary="Lighting" />
-				</materialMaps>
-			</pass>
-
-			<pass class="quad" name="process2" >
-				<materialMaps>
-					<map fromMaterial="__Quad" toMaterial="branchBlur" toLibrary="Lighting" />
-				</materialMaps>
-			</pass>
-
-			<pass class="quad" name="show" >
-				<viewport name="MainViewport" />
-				<camera name="MainCamera" />
-				<lights>
-					<light name="Sun" />
-				</lights>
-				<materialMaps>
-					<map fromMaterial="*" toMaterial="blend" toLibrary="Lighting" />
-				</materialMaps>
-			</pass>
 		</pipeline>
 	</pipelines>
 
 	<interface>
         <window label="settings">
 			<var label="Complexity" type="PASS" context="lightning#lightning" component="CPLX" def="min=0.0 max=1.0 step=0.1"/>
+			<var label="Maximum Branches per Segment" type="PASS" context="lightning#lightning" component="BRANCH" def="min=0 max=2 step=1"/>
 			<var label="Length of Segments" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
 			<var label="Possible Curvature" type="PASS" context="lightning#lightning" component="WIDTH" def="min=0.1 max=1.0 step=0.1"/>
+			<var label="Influence of the Weighted Direction" type="PASS" context="lightning#lightning" component="WEIGHT" def="min=0.0 max=1.0 step=0.1"/>
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
-			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=2 step=0.01"/>
+			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=2 step=0.250"/>
 		</window>
     </interface>
 </project>

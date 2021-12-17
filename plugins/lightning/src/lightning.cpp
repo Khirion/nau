@@ -325,10 +325,17 @@ void
 PassLightning::genLightning(void) {
 	mBranch = mainBranch(m_FloatProps[Attribs.get("CPLX")->getId()],
 						 m_FloatProps[Attribs.get("WIDTH")->getId()],
-						 static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
-						 m_IntProps[Attribs.get("BRANCH")->getId()]);
+						 m_FloatProps[Attribs.get("WEIGHT")->getId()],
+						 static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]));
 
 	mBranch.init(waypoints);
+
+	int cull = m_IntProps[Attribs.get("BRANCH")->getId()];
+	std::vector<glm::vec3> branchNodes = mBranch.getBranchNodes();
+
+	for (int i = 0; i < cull; i++) {
+
+	}
 
 	if (branchpoints.size() % 2 || branchpoints.empty()) {
 		mBranch.makeIndexes();

@@ -21,6 +21,7 @@ class mainBranch {
         float pi = (float) 3.14159;
         float cplx;
         float width;
+        float weight;
         float killDistance;
         float attDistance;
         float growthLength;
@@ -31,13 +32,14 @@ class mainBranch {
     public:
         mainBranch() {};
 
-        mainBranch(float complexity, float _width, float _growthLength, int _cull) :
+        mainBranch(float complexity, float _width, float _weight, float _growthLength) :
             tree(std::vector<node>()),
             charges(std::list<charge>()),
             end(glm::vec3(0, 0, 0)),
             root(glm::vec3(0, 0, 0)),
             branchNodes(std::vector<glm::vec3>()),
             width(_width),
+            weight(_weight),
             cplx(complexity * 0.875f),
             killDistance(_growthLength),
             attDistance(2*_growthLength),
@@ -66,6 +68,7 @@ class mainBranch {
         void addVector(std::vector<node> vector);
         int getSize();
 
+        std::vector<glm::vec3> getBranchNodes();
         std::vector<glm::vec3> getVertices();
         unsigned int getIndiceSize();
         std::pair<std::vector<unsigned int>, std::vector<unsigned int>> getIndices(float size);
