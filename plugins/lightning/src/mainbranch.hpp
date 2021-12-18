@@ -51,12 +51,11 @@ class mainBranch {
 
         ~mainBranch() {};
 
-        void init(std::vector<glm::vec3> waypoints);
-        void genCharges();
-        void genRect(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
+        void init(std::vector<glm::vec3> waypoints, int gen);
+        void genCharges(int gen);
         void genCyl(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
-        void genPyr(glm::vec3 center, glm::mat3 transform, float height, float side);
         void genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
+        void genSphere(glm::vec3 center, glm::mat3 transform, float height);
         void grow();
 
         void makeMap();

@@ -330,7 +330,7 @@ PassLightning::genLightning() {
 						 m_FloatProps[Attribs.get("WEIGHT")->getId()],
 						 static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]));
 
-	mBranch.init(waypoints);
+	mBranch.init(waypoints, m_IntProps[Attribs.get("GEN")->getId()]);
 
 	if (cull > 0)
 		genBranches();
