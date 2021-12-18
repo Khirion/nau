@@ -141,7 +141,7 @@ void mainBranch::grow() {
         const node& curNode = tree.back();
 
         if (genR() < cplx)
-            branchNodes.push_back(curNode.pos);
+            branchNodes.push_back(std::make_pair(static_cast<int>(tree.size()-1), curNode.pos));
 
         // Scol Growth
         if(atts)
@@ -312,7 +312,7 @@ int mainBranch::getSize()
     return tree.size();
 }
 
-std::vector<glm::vec3> mainBranch::getVertices() {
+std::vector<std::pair<int, glm::vec3>> mainBranch::getBranchNodes() {
     return branchNodes;
 }
 

@@ -2,10 +2,10 @@
 <project name="Lightning" width='1024' height='1024'>
 	<assets>
 		<attributes>			
-			<attribute type="PASS" name="CPLX" data="FLOAT" value="1.0"/>
-			<attribute type="PASS" name="BRANCH" data="INT" value="2"/>
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.5"/>
+			<attribute type="PASS" name="BRANCH" data="INT" value="1"/>
 			<attribute type="PASS" name="WIDTH" data="FLOAT" value="0.1"/>
-			<attribute type="PASS" name="WEIGHT" data="FLOAT" value="0.1"/>
+			<attribute type="PASS" name="WEIGHT" data="FLOAT" value="0.6"/>
 			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="25" />
 			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
 			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
@@ -74,7 +74,7 @@
 			<var label="Maximum Branches per Segment" type="PASS" context="lightning#lightning" component="BRANCH" def="min=0 max=2 step=1"/>
 			<var label="Length of Segments" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
 			<var label="Possible Curvature" type="PASS" context="lightning#lightning" component="WIDTH" def="min=0.1 max=1.0 step=0.1"/>
-			<var label="Influence of the Weighted Direction" type="PASS" context="lightning#lightning" component="WEIGHT" def="min=0.0 max=1.0 step=0.1"/>
+			<var label="Influence of the Weighted Direction" type="PASS" context="lightning#lightning" component="WEIGHT" def="min=0.1 max=1.0 step=0.1"/>
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
 			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=2 step=0.250"/>
 		</window>

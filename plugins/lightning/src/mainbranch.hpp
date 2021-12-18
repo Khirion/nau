@@ -1,4 +1,7 @@
 #pragma once
+
+#define GLM_FORCE_RADIANS
+
 #include "scol.hpp"
 #include <glbinding/gl/gl.h>
 #include <../glm/gtx/rotate_vector.hpp>
@@ -16,7 +19,7 @@ class mainBranch {
         std::map<int, std::vector<int>> parIndMap;
         glm::vec3 root;
         glm::vec3 end;
-        std::vector<glm::vec3> branchNodes;
+        std::vector<std::pair<int, glm::vec3>> branchNodes;
 
         float pi = (float) 3.14159;
         float cplx;
@@ -37,10 +40,10 @@ class mainBranch {
             charges(std::list<charge>()),
             end(glm::vec3(0, 0, 0)),
             root(glm::vec3(0, 0, 0)),
-            branchNodes(std::vector<glm::vec3>()),
+            branchNodes(std::vector<std::pair<int, glm::vec3>>()),
             width(_width),
             weight(_weight),
-            cplx(complexity * 0.875f),
+            cplx(complexity * 0.5f),
             killDistance(_growthLength),
             attDistance(2*_growthLength),
             growthLength(static_cast<float>(_growthLength))
@@ -68,7 +71,7 @@ class mainBranch {
         void addVector(std::vector<node> vector);
         int getSize();
 
-        std::vector<glm::vec3> getBranchNodes();
+        std::vector<std::pair<int, glm::vec3>> getBranchNodes();
         std::vector<glm::vec3> getVertices();
         unsigned int getIndiceSize();
         std::pair<std::vector<unsigned int>, std::vector<unsigned int>> getIndices(float size);

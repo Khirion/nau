@@ -1,12 +1,12 @@
 #include "branches.hpp"
 
-void branch::init(int pInd, std::pair<glm::vec3, glm::vec3> waypoints, const std::vector<glm::vec3>& mainTree) {
-    tree.push_back(node(pInd, waypoints.first, glm::normalize(waypoints.second - waypoints.first), false));
+void branch::init(int pInd, glm::vec3 _start, glm::vec3 _end, const std::vector<glm::vec3>& mainTree) {
+    tree.push_back(node(pInd, _start, glm::normalize(_end - _start), false));
 
-    root = waypoints.first;
-    end = waypoints.second;
+    root = _start;
+    end = _end;
 
-    charges.push_back(waypoints.second);
+    charges.push_back(_end);
     genCharges();
     checkTreeDel(mainTree);
     grow();
@@ -42,7 +42,7 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 100 * height; i++) {
+    for (int i = 0; i < 10 * height; i++) {
         y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
@@ -52,8 +52,8 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
 
 float branch::biModal() {
     static std::default_random_engine generator;
-    std::normal_distribution<float> randL(0.35, 0.25);
-    std::normal_distribution<float> randH(0.75, 0.25);
+    std::normal_distribution<float> randL(0.35, 0.35/6);
+    std::normal_distribution<float> randH(0.75, 0.75/6);
     std::bernoulli_distribution randB(0.5);
 
     return(randB(generator) ? randL(generator) : randH(generator));
@@ -76,16 +76,16 @@ void branch::grow() {
         const node& curNode = tree.back();
 
         if (genR() < cplx)
-            branchNodes.push_back(curNode.pos);
+            branchNodes.push_back(std::make_pair(static_cast<int>(tree.size()) + mainIndex - 1, curNode.pos));
 
         // Scol Growth
         if (atts)
-            newPos = curNode.pos + (glm::normalize((curNode.dir * 0.4f) + (curNode.weightDir * 0.6f)) * growthLength);
+            newPos = curNode.pos + (glm::normalize((curNode.dir * (1.f - weight)) + (curNode.weightDir * weight)) * growthLength);
         //16 degree random growth
         else
-            newPos = curNode.pos + (glm::normalize(randdir(curNode.dir * 0.4f) + (curNode.weightDir * 0.6f)) * growthLength);
+            newPos = curNode.pos + (glm::normalize(randdir(curNode.weightDir * (1.f - weight)) + (curNode.weightDir * weight)) * growthLength);
 
-        node child = node(static_cast<int>(tree.size() - 1), newPos, glm::normalize(end - newPos), true);
+        node child = node(static_cast<int>(tree.size()) + mainIndex - 1, newPos, glm::normalize(end - newPos), false);
         tree.push_back(child);
         flag = checkDeletion(child);
     }
@@ -93,16 +93,16 @@ void branch::grow() {
 
 glm::vec3 branch::randdir(glm::vec3 vec) {
     // Introduce jaggedness
-    std::random_device rd;
+    static std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(0.5);
 
     bool flag = d(gen);
 
     if (flag)
-        vec = glm::rotateX(vec, (d(gen) ? 16.f : -16.f));
+        vec = glm::rotateX(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
     else
-        vec = glm::rotateZ(vec, (d(gen) ? 16.f : -16.f));
+        vec = glm::rotateZ(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
     return vec;
 }
 
@@ -153,6 +153,11 @@ void branch::checkTreeDel(const std::vector<glm::vec3>& mainTree)
 
     charges.remove_if([](charge x) {return x.deletionFlag; });
 }
+
+std::vector<std::pair<int, glm::vec3>> branch::getBranchNodes() {
+    return branchNodes;
+}
+
 
 std::vector<node> branch::getVector()
 {
