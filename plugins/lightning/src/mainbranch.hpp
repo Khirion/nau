@@ -1,4 +1,7 @@
 #pragma once
+
+#define GLM_FORCE_RADIANS
+
 #include "scol.hpp"
 #include <glbinding/gl/gl.h>
 #include <../glm/gtx/rotate_vector.hpp>
@@ -14,16 +17,14 @@ class mainBranch {
         std::vector<node> tree;
         std::list<charge> charges;
         std::map<int, std::vector<int>> parIndMap;
-        glm::vec3 startDir;
         glm::vec3 root;
         glm::vec3 end;
-        glm::vec3 middle;
-        int lastNode;
-        int cull;
+        std::vector<std::pair<int, glm::vec3>> branchNodes;
 
         float pi = (float) 3.14159;
         float cplx;
         float width;
+        float weight;
         float killDistance;
         float attDistance;
         float growthLength;
@@ -34,20 +35,18 @@ class mainBranch {
     public:
         mainBranch() {};
 
-        mainBranch(float complexity, float _width, float _growthLength, int _cull) :
+        mainBranch(float complexity, float _width, float _weight, float _growthLength) :
             tree(std::vector<node>()),
             charges(std::list<charge>()),
-            middle(glm::vec3(0, 0, 0)),
             end(glm::vec3(0, 0, 0)),
             root(glm::vec3(0, 0, 0)),
-            startDir(glm::vec3(0, 0, 0)),
-            lastNode(0),
+            branchNodes(std::vector<std::pair<int, glm::vec3>>()),
             width(_width),
-            cplx(complexity * 0.875f),
+            weight(_weight),
+            cplx(complexity * 0.5f),
             killDistance(_growthLength),
-            attDistance(2.f * _growthLength),
-            growthLength(static_cast<float>(_growthLength)),
-            cull(_cull)
+            attDistance(2*_growthLength),
+            growthLength(static_cast<float>(_growthLength))
         {};
 
         ~mainBranch() {};
@@ -67,11 +66,12 @@ class mainBranch {
         glm::vec3 randdir(glm::vec3 vec);
         std::pair<int, glm::vec3> getClosest(glm::vec3 pos);
         bool updateAttractors();
-        bool checkDeletion(const std::vector<node>& buffer);
+        bool checkDeletion(const node& n);
 
         void addVector(std::vector<node> vector);
         int getSize();
 
+        std::vector<std::pair<int, glm::vec3>> getBranchNodes();
         std::vector<glm::vec3> getVertices();
         unsigned int getIndiceSize();
         std::pair<std::vector<unsigned int>, std::vector<unsigned int>> getIndices(float size);

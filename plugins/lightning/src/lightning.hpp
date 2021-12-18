@@ -1,6 +1,8 @@
 #ifndef PASSLIGHTNING_HPP
 #define PASSLIGHTNING_HPP
 
+#define GLM_FORCE_RADIANS
+
 #include <vector>
 
 #include "iNau.h"
@@ -11,14 +13,17 @@
 
 #include "mainbranch.hpp"
 #include "branches.hpp"
+#include <../glm/gtx/rotate_vector.hpp>
 
 class PassLightning : public Pass
 		{
 		protected:
+			float pi = (float)3.14159;
 			unsigned int RESTART;
 			unsigned int TIMECOEF;
 			unsigned int CONTROL;
 			unsigned int TIME;
+			int cull;
 			float timeCoef;
 			float timer;
 			float startTime;
@@ -33,7 +38,11 @@ class PassLightning : public Pass
 			void cleanGeometry();
 			void loadWaypoints();
 			void loadBranchpoints();
-			void genLightning(void);
+			void genLightning();
+			void genBranches();
+			void genBways();
+			glm::vec3 randVec(glm::vec3 vec);
+			float randDist(float dist);
 
 		public:
 			static std::shared_ptr<Pass> Create(const std::string& name);

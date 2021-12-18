@@ -55,6 +55,7 @@ PassLightning::init() {
 	CONTROL = Attribs.get("CONTROL")->getId();
 	TIMECOEF = Attribs.get("TIMECOEF")->getId();
 	TIME = Attribs.get("TIME")->getId();
+	cull = m_IntProps[Attribs.get("BRANCH")->getId()];
 	startTime = 0;
 	stepTime = 0.2f;
 	m_FloatProps[TIME] = 0.f;
@@ -161,16 +162,17 @@ PassLightning::prepareGeometry() {
 	vertexData->setDataFor(VertexData::GetAttribIndex(std::string("position")), vertices);
 
 	// create indices and fill the array
-	std::shared_ptr<std::vector<unsigned int>> indices = std::make_shared<std::vector<unsigned int>>(0);
+	std::shared_ptr<std::vector<unsigned int>> mindices = std::make_shared<std::vector<unsigned int>>(0);
+	std::shared_ptr<std::vector<unsigned int>> bindices = std::make_shared<std::vector<unsigned int>>(0);
 
 	// Main Indices
 	std::shared_ptr<MaterialGroup> aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Bolt");
-	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->setIndexList(mindices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
 	// Branch Indices
 	aMaterialGroup = MaterialGroup::Create(m_Renderable.get(), "__Branch");
-	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->setIndexList(bindices);
 	m_Renderable->addMaterialGroup(aMaterialGroup);
 
 	std::shared_ptr<SceneObject>& m_SceneObject = nau::scene::SceneObjectFactory::Create("SimpleObject");
@@ -220,8 +222,10 @@ PassLightning::iterateGeometry() {
 	vector<unsigned int> auxi, auxb = vector<unsigned int>(1, (0, 0, 0));
 	std::pair<std::vector<unsigned int>, std::vector<unsigned int>> indPair;
 	indPair = mBranch.getIndices(ppart);
-	auxi = indPair.first;
-	auxb = indPair.second;
+	if (!indPair.first.empty())
+		auxi = indPair.first;
+	if(!indPair.second.empty())
+		auxb = indPair.second;
 
 	// Main Branch
 	// create indices and fill the array
@@ -319,42 +323,144 @@ PassLightning::prepare(void) {
 }
 
 void
-PassLightning::genLightning(void) {
+PassLightning::genLightning() {
+	cull = m_IntProps[Attribs.get("BRANCH")->getId()];
 	mBranch = mainBranch(m_FloatProps[Attribs.get("CPLX")->getId()],
 						 m_FloatProps[Attribs.get("WIDTH")->getId()],
-						 static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
-						 m_IntProps[Attribs.get("BRANCH")->getId()]);
+						 m_FloatProps[Attribs.get("WEIGHT")->getId()],
+						 static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]));
 
 	mBranch.init(waypoints);
 
-	if (branchpoints.size() % 2 || branchpoints.empty()) {
-		mBranch.makeIndexes();
-		return;
-	}
+	if (cull > 0)
+		genBranches();
 
-	branch b;
-	std::pair<glm::vec3, glm::vec3> bway;
+	if (branchpoints.size() % 2 == 0 && !branchpoints.empty())
+		genBways();
+
+	mBranch.makeIndexes();
+}
+ 
+
+void
+PassLightning::genBranches() {
+	glm::vec3 end;
 	std::pair<int, glm::vec3> startPoint;
 	std::vector<glm::vec3> mainTree;
+	float dist = 0.f;
+
+	std::vector<std::pair<int, glm::vec3>> branchNodes = std::vector<std::pair<int, glm::vec3>>(0);
+	std::vector<std::pair<int, glm::vec3>> buffer = mBranch.getBranchNodes();
+	std::vector<std::pair<int, glm::vec3>> temp = std::vector<std::pair<int, glm::vec3>>(0);
+
+
+	for (int i = 0; i < cull; i++) {
+		branchNodes.assign(buffer.begin(), buffer.end());
+		buffer.clear();
+
+		for (std::pair<int, glm::vec3> p : branchNodes) {
+			mainTree = mBranch.getVertices();
+
+			dist = glm::distance(p.second, waypoints.back());
+
+			dist /= powf(max(1, (dist * 2) / glm::distance(waypoints.front(), waypoints.back())) * (i + 1), 2);
+
+			end = p.second + (glm::normalize(randVec(waypoints.back() - p.second)) * randDist(dist));
+			branch b = branch(m_FloatProps[Attribs.get("CPLX")->getId()],
+				mBranch.getSize(),
+				m_FloatProps[Attribs.get("WEIGHT")->getId()],
+				static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
+				i + 1);
+
+			b.init(p.first, p.second, end, mainTree);
+			mBranch.addVector(b.getVector());
+
+			temp = b.getBranchNodes();
+			buffer.insert(buffer.end(), temp.begin(), temp.end());
+		}
+	}
+}
+
+void
+PassLightning::genBways() {
+	glm::vec3 end;
+	std::pair<int, glm::vec3> startPoint;
+	std::vector<glm::vec3> mainTree;
+	float dist = 0.f;
+
+	int cull = m_IntProps[Attribs.get("BRANCH")->getId()];
+	std::vector<std::pair<int, glm::vec3>> branchNodes = std::vector<std::pair<int, glm::vec3>>(0);
+	std::vector<std::pair<int, glm::vec3>> buffer = std::vector<std::pair<int, glm::vec3>>(0);
+	std::vector<std::pair<int, glm::vec3>> temp = std::vector<std::pair<int, glm::vec3>>(0);
+
 
 	for (unsigned int i = 0; i < branchpoints.size(); i += 2) {
 		startPoint = mBranch.getClosest(waypoints[0] + (glm::normalize(waypoints.back() - waypoints[0]) * branchpoints[i].x));
 		mainTree = mBranch.getVertices();
 
-		bway = std::pair<glm::vec3, glm::vec3>(startPoint.second, startPoint.second + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y));
+		end = startPoint.second + (glm::normalize(branchpoints[i + 1]) * branchpoints[i].y);
 
-		b = branch(m_FloatProps[Attribs.get("CPLX")->getId()], 
-					mBranch.getSize(),
-					static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
-					branchpoints[i].z);
+		branch b = branch(branchpoints[i].z,
+			mBranch.getSize(),
+			m_FloatProps[Attribs.get("WEIGHT")->getId()],
+			static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
+			1);
 
-		b.init(startPoint.first, bway, mainTree);
+		b.init(startPoint.first, startPoint.second, end, mainTree);
 		mBranch.addVector(b.getVector());
+
+		if (cull > 1) {
+			temp = b.getBranchNodes();
+			buffer.insert(buffer.end(), temp.begin(), temp.end());
+		}
 	}
 
-	mBranch.makeIndexes();
+	for (int i = 1; i < cull; i++) {
+		branchNodes.assign(buffer.begin(), buffer.end());
+		buffer.clear();
+
+		for (std::pair<int, glm::vec3> p : branchNodes) {
+			mainTree = mBranch.getVertices();
+
+			dist = glm::distance(p.second, waypoints.back());
+
+			dist /= powf(max(1, (dist * 2) / glm::distance(waypoints.front(), waypoints.back())) * (i + 1), 2);
+
+			end = p.second + (glm::normalize(randVec(waypoints.back() - p.second)) * randDist(dist));
+			branch b = branch(m_FloatProps[Attribs.get("CPLX")->getId()],
+				mBranch.getSize(),
+				m_FloatProps[Attribs.get("WEIGHT")->getId()],
+				static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
+				i + 1);
+
+			b.init(p.first, p.second, end, mainTree);
+			mBranch.addVector(b.getVector());
+
+			temp = b.getBranchNodes();
+			buffer.insert(buffer.end(), temp.begin(), temp.end());
+		}
+	}
 }
- 
+
+glm::vec3 PassLightning::randVec(glm::vec3 vec) {
+	// Introduce jaggedness
+	static std::default_random_engine generator;
+	std::normal_distribution<float> randP(glm::radians(16.f), glm::radians(16.f)/3);
+	std::normal_distribution<float> randN(glm::radians(-16.f), glm::radians(16.f)/3);
+	std::bernoulli_distribution randB(0.5);
+
+	float angle = (randB(generator) ? randP(generator) : randN(generator));
+
+	return glm::rotateZ(vec, angle);
+}
+
+float PassLightning::randDist(float dist) {
+	static std::default_random_engine generator;
+	std::uniform_real_distribution<float> randG(0.f, 1.f);
+	auto genR = bind(randG, generator);
+
+	return dist * genR();
+}
 
 void
 PassLightning::restore(void) {

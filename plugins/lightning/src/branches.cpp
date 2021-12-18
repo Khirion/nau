@@ -1,14 +1,12 @@
 #include "branches.hpp"
 
-void branch::init(int pInd, std::pair<glm::vec3, glm::vec3> waypoints, const std::vector<glm::vec3>& mainTree) {
-    tree.push_back(node(pInd, waypoints.first, glm::normalize(waypoints.second - waypoints.first), false));
+void branch::init(int pInd, glm::vec3 _start, glm::vec3 _end, const std::vector<glm::vec3>& mainTree) {
+    tree.push_back(node(pInd, _start, glm::normalize(_end - _start), false));
 
-    root = waypoints.first;
-    middle = (root + waypoints.second) / 2.f;
-    startDir = glm::normalize(waypoints.second - root);
-    end = waypoints.second;
+    root = _start;
+    end = _end;
 
-    charges.push_back(waypoints.second);
+    charges.push_back(_end);
     genCharges();
     checkTreeDel(mainTree);
     grow();
@@ -44,7 +42,7 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 100 * height; i++) {
+    for (int i = 0; i < 10 * height; i++) {
         y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
@@ -54,123 +52,87 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
 
 float branch::biModal() {
     static std::default_random_engine generator;
-    std::normal_distribution<float> randL(0.35, 0.25);
-    std::normal_distribution<float> randH(0.75, 0.25);
+    std::normal_distribution<float> randL(0.35, 0.35/6);
+    std::normal_distribution<float> randH(0.75, 0.75/6);
     std::bernoulli_distribution randB(0.5);
 
     return(randB(generator) ? randL(generator) : randH(generator));
 }
 
 void branch::grow() {
+    static std::default_random_engine generator;
+    std::uniform_real_distribution<float> rand(0.f, 1.f);
+    auto genR = bind(rand, generator);
+
     std::vector<node>::iterator n;
     std::list<charge>::iterator c;
-    std::vector<node> buffer = std::vector<node>();
-    glm::vec3 tempPos = glm::vec3();
+    glm::vec3 newPos = glm::vec3();
     bool flag = true;
+    bool atts = false;
     node child;
 
-    flag = checkDeletion(tree);
-
-    // Initial Growth
-    while (!updateAttractors() && !charges.empty() && flag) {
+    while (flag) {
+        atts = updateAttractors();
         const node& curNode = tree.back();
-        tempPos = curNode.pos + (randdir(glm::normalize(curNode.dir + curNode.startDir)) * growthLength);
-        node child = node(static_cast<int>(tree.size() - 1) + mainIndex, tempPos, glm::normalize(end - tempPos), false);
+
+        if (genR() < cplx)
+            branchNodes.push_back(std::make_pair(static_cast<int>(tree.size()) + mainIndex - 1, curNode.pos));
+
+        // Scol Growth
+        if (atts)
+            newPos = curNode.pos + (glm::normalize((curNode.dir * (1.f - weight)) + (curNode.weightDir * weight)) * growthLength);
+        //16 degree random growth
+        else
+            newPos = curNode.pos + (glm::normalize(randdir(curNode.weightDir * (1.f - weight)) + (curNode.weightDir * weight)) * growthLength);
+
+        node child = node(static_cast<int>(tree.size()) + mainIndex - 1, newPos, glm::normalize(end - newPos), false);
         tree.push_back(child);
-        flag = checkDeletion(std::vector<node>(1, child));
-    }
-
-    lastNode = tree.size() - 1;
-
-    // Space Colonization Growth
-    while (updateAttractors() && flag) {
-        for (const charge& charge : charges) {
-            if (charge.closestIndex > -1) {
-                n = tree.begin() + charge.closestIndex;
-                n->attNum += 1;
-                n->dir += glm::normalize(charge.pos - n->pos);
-            }
-        }
-
-        int i = 0;
-
-        for (n = tree.begin(); n != tree.end(); n++, i++) {
-            if (n->attNum > 0) {
-                n->dir = glm::normalize(n->dir);
-                n->attNum = 0;
-
-                if (i == lastNode) {
-                    tempPos = n->pos + (glm::normalize(n->dir * 0.75f + n->startDir) * growthLength);
-                    child = node(mainIndex + i, tempPos, glm::normalize(end - tempPos), false);
-                    lastNode = tree.size() + buffer.size();
-                }
-                else {
-                    tempPos = n->pos + (glm::normalize(n->dir + n->startDir * 0.75f) * growthLength);
-                    child = node(mainIndex + i, tempPos, glm::normalize(end - tempPos), false);
-                }
-                buffer.push_back(child);
-            }
-        }
-        tree.insert(tree.end(), buffer.begin(), buffer.end());
-        flag = checkDeletion(buffer);
-        buffer.clear();
+        flag = checkDeletion(child);
     }
 }
 
 glm::vec3 branch::randdir(glm::vec3 vec) {
     // Introduce jaggedness
-    std::random_device rd;
+    static std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(0.5);
 
     bool flag = d(gen);
 
     if (flag)
-        vec = glm::rotateX(vec, (d(gen) ? 16.f : -16.f));
+        vec = glm::rotateX(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
     else
-        vec = glm::rotateZ(vec, (d(gen) ? 16.f : -16.f));
+        vec = glm::rotateZ(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
     return vec;
 }
 
 bool branch::updateAttractors() {
-    static std::default_random_engine generator;
-    std::uniform_real_distribution<float> rand(0.f, 1.f);
-    auto genR = bind(rand, generator);
-
+    std::vector<node>::iterator n = tree.end() - 1;;
     std::list<charge>::iterator c;
     bool flag = false;
     float dist = 0;
-    int count = 0;
-    int index = 0;
 
-    for (int i = 0; i < tree.size(); i++) {
-        index = i + mainIndex;
-        count = std::count_if(tree.begin(), tree.end(), [i, index](node n) {return (n.parentIndex == index); }) - tree[i].mainBranch;
-        if (i == lastNode || (genR() * std::max(1, count * 2) < cplx && count < cull)) {
-            for (c = charges.begin(); c != charges.end(); c++) {
-                dist = glm::distance(tree[i].pos, c->pos);
-                if (dist <= attDistance && (c->closestIndex == -1 || dist <= glm::distance(tree[c->closestIndex].pos, c->pos))) {
-                    flag = true;
-                    c->closestIndex = i;
-                }
-            }
+    for (c = charges.begin(); c != charges.end(); c++) {
+        dist = glm::distance(tree.back().pos, c->pos);
+        if (dist <= attDistance) {
+            flag = true;
+            n->dir += glm::normalize(c->pos - n->pos);
         }
     }
+
+    n->dir = glm::normalize(n->dir);
+
     return flag;
 }
 
-bool branch::checkDeletion(const std::vector<node>& buffer) {
+bool branch::checkDeletion(const node& n) {
     std::list<charge>::iterator c;
-
-    for (const node& n : buffer) {
-        for (c = charges.begin(); c != charges.end(); c++) {
-            c->closestIndex = -1;
-            if (glm::distance(n.pos, c->pos) <= killDistance)
-                c->reached = true;
-        }
+    for (c = charges.begin(); c != charges.end(); c++) {
+        if (glm::distance(n.pos, c->pos) < killDistance)
+            c->deletionFlag = true;
     }
 
-    charges.remove_if([](charge x) {return x.reached; });
+    charges.remove_if([](charge x) {return x.deletionFlag; });
 
     if (charges.empty())
         return false;
@@ -185,12 +147,17 @@ void branch::checkTreeDel(const std::vector<glm::vec3>& mainTree)
     for (const glm::vec3& n : mainTree) {
         for (c = charges.begin(); c != charges.end(); c++) {
             if (glm::distance(n, c->pos) <= killDistance)
-                c->reached = true;
+                c->deletionFlag = true;
         }
     }
 
-    charges.remove_if([](charge x) {return x.reached; });
+    charges.remove_if([](charge x) {return x.deletionFlag; });
 }
+
+std::vector<std::pair<int, glm::vec3>> branch::getBranchNodes() {
+    return branchNodes;
+}
+
 
 std::vector<node> branch::getVector()
 {
