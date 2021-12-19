@@ -207,7 +207,7 @@ std::pair<int, glm::vec3> mainBranch::getClosest(glm::vec3 pos) {
 
     for(int i = 0; i < tree.size(); i++){
         dist = glm::distance(tree[i].pos, pos);
-        if (closestDist > dist) {
+        if (closestDist > dist && tree[i].mainBranch) {
             index = i;
             closestDist = dist;
         }
