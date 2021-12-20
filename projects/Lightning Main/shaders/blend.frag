@@ -13,16 +13,11 @@ in vec2 texCoordV;
 out vec4 outColor;
 
 void main() {
-    float f = (time - (stepTime * (control+1)));
+    float f = (time - (stepTime * (control)));
 
     switch (control){
-        case -1:
-            outColor = vec4(texture(sceneUnit,texCoordV).rgb, 1.0);
-            break;
-
         case 0:
-            f *= 5;
-            outColor = vec4((texture(blurUnit,texCoordV).rgb * (f)) + (texture(branchUnit,texCoordV).rgb * (f/2)) + texture(sceneUnit,texCoordV).rgb, 1.0);
+            outColor = vec4(texture(sceneUnit,texCoordV).rgb, 1.0);
             break;
         
         case 1:

@@ -126,6 +126,7 @@ void mainBranch::grow() {
     std::vector<node>::iterator n;
     std::list<charge>::iterator c;
     glm::vec3 newPos = glm::vec3();
+    float dist = 0.f;
     bool flag = true;
     bool atts = false;
     node child;
@@ -134,7 +135,9 @@ void mainBranch::grow() {
         atts = updateAttractors();
         const node& curNode = tree.back();
 
-        if (genR() < cplx)
+        dist = std::max(1.f, glm::distance(curNode.pos, end)) / glm::distance(root, end);
+
+        if (genR() < cplx * std::max(0.1f,dist))
             branchNodes.push_back(std::make_pair(static_cast<int>(tree.size()-1), curNode.pos));
 
         // Scol Growth
@@ -159,9 +162,9 @@ glm::vec3 mainBranch::randdir(glm::vec3 vec) {
     bool flag = d(gen);
 
     if (flag)
-        vec = glm::rotateX(vec, (d(gen) ? 16.f : -16.f));
+        vec = glm::rotateX(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
     else
-        vec = glm::rotateZ(vec, (d(gen) ? 16.f : -16.f));
+        vec = glm::rotateZ(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
     return vec;
 }
 

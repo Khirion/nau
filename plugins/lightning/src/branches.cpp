@@ -42,7 +42,7 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 10 * height; i++) {
+    for (int i = 0; i < 250 * height; i++) {
         y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
@@ -76,7 +76,7 @@ void branch::grow() {
         const node& curNode = tree.back();
 
         if (genR() < cplx)
-            branchNodes.push_back(std::make_pair(static_cast<int>(tree.size()) + mainIndex - 1, curNode.pos));
+            branchNodes.push_back(std::make_pair(static_cast<int>(tree.size() - 1) + mainIndex, curNode.pos));
 
         // Scol Growth
         if (atts)

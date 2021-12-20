@@ -24,6 +24,8 @@ class PassLightning : public Pass
 			unsigned int CONTROL;
 			unsigned int TIME;
 			int cull;
+			float pblen;
+			float sblen;
 			float timeCoef;
 			float timer;
 			float startTime;
@@ -41,8 +43,8 @@ class PassLightning : public Pass
 			void genLightning();
 			void genBranches();
 			void genBways();
-			glm::vec3 randVec(glm::vec3 vec);
-			float randDist(float dist);
+			glm::vec3 randVec(glm::vec3 vec, int i);
+			float randDist(float dist, int i);
 
 		public:
 			static std::shared_ptr<Pass> Create(const std::string& name);

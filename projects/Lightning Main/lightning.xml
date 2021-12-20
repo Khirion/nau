@@ -2,11 +2,14 @@
 <project name="Lightning" width='1024' height='1024'>
 	<assets>
 		<attributes>			
-			<attribute type="PASS" name="CPLX" data="FLOAT" value="1.0"/>
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.2"/>
 			<attribute type="PASS" name="BRANCH" data="INT" value="2"/>
-			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1.0"/>
+			<attribute type="PASS" name="GEN" data="INT" value="0"/>
+			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1"/>
 			<attribute type="PASS" name="WEIGHT" data="FLOAT" value="0.6"/>
-			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="25" />
+			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="15" />
+			<attribute type="PASS" name="PBLENGTH" data="FLOAT" value="1.0" />
+			<attribute type="PASS" name="SBLENGTH" data="FLOAT" value="1.0" />
 			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
 			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
 			<attribute type="PASS" name="TIMECOEF" data="FLOAT" value="1.0" />
@@ -26,11 +29,11 @@
 				<FOV value = "60"/>
 				<NEAR value= "0.001"/>
 				<FAR value= "1000000"/>
-				<POSITION x="0.0" y="875" z="-1050" />
-				<LOOK_AT_POINT x="0" y="650" z="0" />
+				<POSITION x="0.0" y="875" z="-1750" />
+				<LOOK_AT_POINT x="0" y="850" z="0" />
 			</camera>
 		</cameras>
-		
+
 		<lights>
 			<light name="Sun">
 				<DIRECTION x="-2" y="-1" z="-2" />
@@ -96,7 +99,10 @@
         <window label="settings">
 			<var label="Complexity" type="PASS" context="lightning#lightning" component="CPLX" def="min=0.0 max=1.0 step=0.1"/>
 			<var label="Maximum Branches per Segment" type="PASS" context="lightning#lightning" component="BRANCH" def="min=0 max=2 step=1"/>
+			<var label="Envelope Type" type="PASS" context="lightning#lightning" component="GEN" def="min=0 max=2 step=1"/>
 			<var label="Length of Segments" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
+			<var label="Length Trimming of Primary Branches" type="PASS" context="lightning#lightning" component="PBLENGTH" def="min=0 max=1 step=0.1"/>
+			<var label="Length Trimming of Secondary Branches" type="PASS" context="lightning#lightning" component="SBLENGTH" def="min=0 max=1 step=0.1"/>
 			<var label="Possible Curvature" type="PASS" context="lightning#lightning" component="WIDTH" def="min=0.1 max=1.0 step=0.1"/>
 			<var label="Influence of the Weighted Direction" type="PASS" context="lightning#lightning" component="WEIGHT" def="min=0.1 max=1.0 step=0.1"/>
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>

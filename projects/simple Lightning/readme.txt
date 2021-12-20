@@ -8,12 +8,13 @@ With each trio of coordinates defining a point in space. The algorithm will then
 
 Branchpoints.txt is a file used to determine the more intricate branches of a user-defined lightning.
 Its format is as follows:
-A   B   0
+A   B   C
 X   Y   Z
-A   B   0
+A   B   C
 X   Y   Z
 ...
 
 A - determines the distance from the root at which the branch will be formed, following a trajectory from the root to the final waypoint and attaching to the closest node.
 B - determines the length of the branch.
+C - complexity
 X Y and Z are the coordinates defining a direction vector which the branch will follow.
