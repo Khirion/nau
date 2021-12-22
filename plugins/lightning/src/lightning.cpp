@@ -369,10 +369,11 @@ PassLightning::genBranches() {
 			branch b = branch(m_FloatProps[Attribs.get("CPLX")->getId()],
 				mBranch.getSize(),
 				m_FloatProps[Attribs.get("WEIGHT")->getId()],
+				m_FloatProps[Attribs.get("WIDTH")->getId()],
 				static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
 				i + 1);
 
-			b.init(branchNodes[j].first, branchNodes[j].second, end, mainTree);
+			b.init(branchNodes[j].first, branchNodes[j].second, end, mainTree, m_IntProps[Attribs.get("GEN")->getId()]);
 			mBranch.addVector(b.getVector());
 
 			temp = b.getBranchNodes();
@@ -403,10 +404,11 @@ PassLightning::genBways() {
 		branch b = branch(branchpoints[i].z,
 			mBranch.getSize(),
 			m_FloatProps[Attribs.get("WEIGHT")->getId()],
+			m_FloatProps[Attribs.get("WIDTH")->getId()],
 			static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
 			1);
 
-		b.init(startPoint.first, startPoint.second, end, mainTree);
+		b.init(startPoint.first, startPoint.second, end, mainTree, m_IntProps[Attribs.get("GEN")->getId()]);
 		mBranch.addVector(b.getVector());
 
 		if (cull > 1) {
@@ -428,10 +430,11 @@ PassLightning::genBways() {
 			branch b = branch(m_FloatProps[Attribs.get("CPLX")->getId()],
 				mBranch.getSize(),
 				m_FloatProps[Attribs.get("WEIGHT")->getId()],
+				m_FloatProps[Attribs.get("WIDTH")->getId()],
 				static_cast<float>(m_IntProps[Attribs.get("GROWTH_LENGTH")->getId()]),
 				i + 1);
 
-			b.init(branchNodes[j].first, branchNodes[j].second, end, mainTree);
+			b.init(branchNodes[j].first, branchNodes[j].second, end, mainTree, m_IntProps[Attribs.get("GEN")->getId()]);
 			mBranch.addVector(b.getVector());
 
 			temp = b.getBranchNodes();

@@ -1,18 +1,18 @@
 #include "branches.hpp"
 
-void branch::init(int pInd, glm::vec3 _start, glm::vec3 _end, const std::vector<glm::vec3>& mainTree) {
+void branch::init(int pInd, glm::vec3 _start, glm::vec3 _end, const std::vector<glm::vec3>& mainTree, int gen) {
     tree.push_back(node(pInd, _start, glm::normalize(_end - _start), false));
 
     root = _start;
     end = _end;
 
     charges.push_back(_end);
-    genCharges();
+    genCharges(gen);
     checkTreeDel(mainTree);
     grow();
 }
 
-void branch::genCharges() {
+void branch::genCharges(int gen) {
     glm::mat3 transform(1);
 
     glm::vec3 vector = glm::normalize(root - end);
@@ -30,7 +30,17 @@ void branch::genCharges() {
 
     float height = glm::distance(root, end);
 
-    genCyl(end, transform, height, height);
+    switch (gen) {
+    case 0:
+        genCyl(end, transform, height, (height * width) / 2);
+        break;
+    case 1:
+        genCone(end, transform, height, (height * width) / 2);
+        break;
+    case 2:
+        genSphere(end, transform, height);
+        break;
+    }
 }
 
 void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float maxRad) {
@@ -52,12 +62,48 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
 
 float branch::biModal() {
     static std::default_random_engine generator;
-    std::normal_distribution<float> randL(0.35, 0.35/6);
-    std::normal_distribution<float> randH(0.75, 0.75/6);
+    std::normal_distribution<float> randL(0.35, 0.25);
+    std::normal_distribution<float> randH(0.75, 0.25);
     std::bernoulli_distribution randB(0.5);
 
     return(randB(generator) ? randL(generator) : randH(generator));
 }
+
+
+void branch::genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad) {
+    static std::default_random_engine generator;
+    std::uniform_real_distribution<float> randG(-1.f, 1.f);
+    auto genR = bind(randG, generator);
+
+    float y = 0.f;
+    float radius = 0.f;
+    float angle = 0.f;
+
+    for (int i = 0; i < 250 * height; i++) {
+        y = biModal();
+        radius = sqrt(genR()) * maxRad * (y); // Random radius element * maximum radius for the disc * linear decrease
+        angle = genR() * 2 * pi;
+        charges.push_back(center + (transform * glm::vec3(radius * cos(angle), y * height, radius * sin(angle))));
+    }
+}
+
+void branch::genSphere(glm::vec3 center, glm::mat3 transform, float height) {
+    static std::default_random_engine generator;
+    std::uniform_real_distribution<float> randG(0.f, 1.f);
+    auto genR = bind(randG, generator);
+
+    float dist = 0.f;
+    float phi = 0.f;
+    float theta = 0.f;
+
+    for (int i = 0; i < 250 * height; i++) {
+        dist = (0.5 - biModal()) * height; // Random radius element * maximum radius for the disc
+        theta = genR() * 2 * pi;
+        phi = genR() * pi;
+        charges.push_back(center + (transform * glm::vec3(dist * sin(phi) * cos(theta), dist * sin(theta) * sin(phi), dist * cos(phi))));
+    }
+}
+
 
 void branch::grow() {
     static std::default_random_engine generator;

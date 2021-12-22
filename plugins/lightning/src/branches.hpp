@@ -18,11 +18,11 @@ private:
     glm::vec3 end;
     std::vector<std::pair<int, glm::vec3>> branchNodes;
     int mainIndex;
-    int degree;
 
     float pi = (float)3.14159;
     float cplx;
     float weight;
+    float width;
     float killDistance;
     float attDistance;
     float growthLength;
@@ -30,7 +30,7 @@ private:
 public:
     branch() {};
 
-    branch(float complexity, int _mainIndex, float _weight, float _growthLength, int _degree) :
+    branch(float complexity, int _mainIndex, float _weight, float _width, float _growthLength, int _degree) :
         tree(std::vector<node>()),
         charges(std::list<charge>()),
         end(glm::vec3(0, 0, 0)),
@@ -38,6 +38,7 @@ public:
         branchNodes(std::vector<std::pair<int, glm::vec3>>()),
         mainIndex(_mainIndex),
         weight(_weight),
+        width(_width),
         cplx(complexity * (0.75f/(_degree*2.f))),
         killDistance(_growthLength),
         attDistance(2.f * _growthLength),
@@ -46,9 +47,11 @@ public:
 
     ~branch() {};
 
-    void init(int pInd, glm::vec3 _start, glm::vec3 _end, const std::vector<glm::vec3>& mainTree);
-    void genCharges();
+    void init(int pInd, glm::vec3 _start, glm::vec3 _end, const std::vector<glm::vec3>& mainTree, int gen);
+    void genCharges(int gen);
     void genCyl(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
+    void genCone(glm::vec3 center, glm::mat3 transform, float height, float maxRad);
+    void genSphere(glm::vec3 center, glm::mat3 transform, float height);
     float biModal();
     void grow();
     glm::vec3 randdir(glm::vec3 vec);
