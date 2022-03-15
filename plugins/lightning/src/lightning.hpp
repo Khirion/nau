@@ -43,7 +43,7 @@ class PassLightning : public Pass
 			void genLightning();
 			void genBranches();
 			void genBways();
-			glm::vec3 randVec(glm::vec3 vec, int i);
+			glm::vec3 randVec(glm::vec3 vec, float d);
 			float randDist(float dist, int i);
 
 		public:

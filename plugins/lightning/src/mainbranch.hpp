@@ -43,7 +43,7 @@ class mainBranch {
             branchNodes(std::vector<std::pair<int, glm::vec3>>()),
             width(_width),
             weight(_weight),
-            cplx(complexity * 0.5f),
+            cplx(complexity * 0.2f),
             killDistance(_growthLength),
             attDistance(2*_growthLength),
             growthLength(static_cast<float>(_growthLength))
@@ -58,6 +58,7 @@ class mainBranch {
         void genSphere(glm::vec3 center, glm::mat3 transform, float height);
         void grow();
 
+        void noOrder();
         void makeMap();
         void makeIndexes();
         float biModal();

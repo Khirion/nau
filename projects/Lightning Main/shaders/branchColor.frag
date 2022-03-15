@@ -7,5 +7,5 @@ layout (location = 2) out vec4 branchColor;
 
 void main()
 {
-	scene = branchColor = vec4(emission.rgb * 0.5, 1.0);
+	scene = branchColor = vec4(emission.rgb, 1.0);
 }

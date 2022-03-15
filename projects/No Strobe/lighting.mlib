@@ -2,7 +2,7 @@
 <materialLib name="Lighting">
 	<renderTargets>
 		<renderTarget name="sceneTarget" >
-			<SIZE width=1024 height=1024 />
+			<SIZE width=1325 height=1325 />
 			<colors>
 				<color name ="scene" internalFormat="RGBA" />
 				<color name ="mainColor" internalFormat="RGBA" />
@@ -12,14 +12,24 @@
 	</renderTargets>
 
 	<textures>
-		<texture name="blur">
-			<WIDTH value=1024 />
-			<HEIGHT value=1024 />
+		<texture name="mainBlur">
+			<WIDTH value=1325 />
+			<HEIGHT value=1325 />
 			<INTERNAL_FORMAT value="RGBA" />
 		</texture>
 		<texture name="branchBlur">
-			<WIDTH value=1024 />
-			<HEIGHT value=1024 />
+			<WIDTH value=1325 />
+			<HEIGHT value=1325 />
+			<INTERNAL_FORMAT value="RGBA" />
+		</texture>
+		<texture name="hBlur">
+			<WIDTH value=1325 />
+			<HEIGHT value=1325 />
+			<INTERNAL_FORMAT value="RGBA" />
+		</texture>
+		<texture name="vBlur">
+			<WIDTH value=1325 />
+			<HEIGHT value=1325 />
 			<INTERNAL_FORMAT value="RGBA" />
 		</texture>
 	</textures>
@@ -29,10 +39,16 @@
 										ps = "shaders/renderScene.frag" />
 		<shader name="mainColor" 		vs = "shaders/branchColor.vert" 
 										ps = "shaders/mainColor.frag" />
+		<shader name="mainBlur" 		vs = "shaders/blur.vert" 
+										ps = "shaders/mainBlur.frag" />
+		<shader name="branchBlur" 		vs = "shaders/blur.vert" 
+										ps = "shaders/branchBlur.frag" />
+		<shader name="hBlur" 			vs = "shaders/blur.vert" 
+										ps = "shaders/hBlur.frag" />
+		<shader name="vBlur" 			vs = "shaders/blur.vert" 
+										ps = "shaders/vBlur.frag" />
 		<shader name="branchColor" 		vs = "shaders/branchColor.vert" 
 										ps = "shaders/branchColor.frag" />
-		<shader name="blur" 			vs = "shaders/blur.vert" 
-										ps = "shaders/blur.frag" />
 		<shader name="blend" 			vs = "shaders/blend.vert" 
 										ps = "shaders/blend.frag" />	
 	</shaders>
@@ -89,8 +105,8 @@
 			</shader>
 		</material>
 
-		<material name ="blur">
-			<shader name="blur">
+		<material name ="mainBlur">
+			<shader name="mainBlur">
 				<values>									
 					<valueof uniform="texUnit"		
 							 type="TEXTURE_BINDING" context="CURRENT"
@@ -104,7 +120,7 @@
 				<texture UNIT=0 name="mainColor" />
 			</textures>	
 			<imageTextures>
-				<imageTexture UNIT=1 texture="blur" >
+				<imageTexture UNIT=1 texture="mainBlur" >
 					<ACCESS value="WRITE_ONLY" />
 					<LEVEL value=0 />
 				</imageTexture>
@@ -112,7 +128,7 @@
 		</material>
 
 		<material name ="branchBlur">
-			<shader name="blur">
+			<shader name="branchBlur">
 				<values>									
 					<valueof uniform="texUnit"		
 							 type="TEXTURE_BINDING" context="CURRENT"
@@ -133,18 +149,68 @@
 			</imageTextures>
 		</material>
 
+		<material name ="hBlur">
+			<shader name="hBlur">
+				<values>									
+					<valueof uniform="texUnit"		
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 id=0 component="UNIT" />		
+					<valueof uniform="imageUnit"	
+							 type="IMAGE_TEXTURE" context="CURRENT"
+							 id=1 component="UNIT" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="mainBlur" />
+			</textures>	
+			<imageTextures>
+				<imageTexture UNIT=1 texture="hBlur" >
+					<ACCESS value="WRITE_ONLY" />
+					<LEVEL value=0 />
+				</imageTexture>
+			</imageTextures>
+		</material>
+
+		<material name ="vBlur">
+			<shader name="vBlur">
+				<values>									
+					<valueof uniform="texUnit"		
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 id=0 component="UNIT" />		
+					<valueof uniform="imageUnit"	
+							 type="IMAGE_TEXTURE" context="CURRENT"
+							 id=1 component="UNIT" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="hBlur" />
+			</textures>	
+			<imageTextures>
+				<imageTexture UNIT=1 texture="vBlur" >
+					<ACCESS value="WRITE_ONLY" />
+					<LEVEL value=0 />
+				</imageTexture>
+			</imageTextures>
+		</material>
+
 		<material name ="blend">
 			<shader name="blend">
 				<values>
-					<valueof uniform="sceneUnit"		
+					<valueof uniform="mainColor"		
 							 type="TEXTURE_BINDING" context="CURRENT"
-							 id=0 component="UNIT" />	
-					<valueof uniform="blurUnit"		
+							 id=0 component="UNIT" />
+					<valueof uniform="branchColor"		
 							 type="TEXTURE_BINDING" context="CURRENT"
 							 id=1 component="UNIT" />
-					<valueof uniform="branchUnit"		
+					<valueof uniform="mainBlur"		
 							 type="TEXTURE_BINDING" context="CURRENT"
 							 id=2 component="UNIT" />
+					<valueof uniform="branchBlur"		
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 id=3 component="UNIT" />	
+					<valueof uniform="blur"		
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 id=4 component="UNIT" />
 					<valueof uniform="time" 
 							 type="PASS" context="lightning#lightning"
 							 component="TIME" />
@@ -157,9 +223,11 @@
 				</values>
 			</shader>
 			<textures>
-				<texture UNIT=0 name="scene" />
-				<texture UNIT=1 name="blur" />
-				<texture UNIT=2 name="branchBlur" />
+				<texture UNIT=0 name="mainColor" />
+				<texture UNIT=1 name="branchColor" />
+				<texture UNIT=2 name="mainBlur" />
+				<texture UNIT=3 name="branchBlur" />
+				<texture UNIT=4 name="vBlur" />
 			</textures>	
 		</material>
 	</materials>

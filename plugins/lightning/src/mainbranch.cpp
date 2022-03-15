@@ -137,7 +137,7 @@ void mainBranch::grow() {
 
         dist = std::max(1.f, glm::distance(curNode.pos, end)) / glm::distance(root, end);
 
-        if (genR() < cplx * std::max(0.1f,dist))
+        if (genR() < cplx)
             branchNodes.push_back(std::make_pair(static_cast<int>(tree.size()-1), curNode.pos));
 
         // Scol Growth
@@ -219,6 +219,15 @@ std::pair<int, glm::vec3> mainBranch::getClosest(glm::vec3 pos) {
     return std::pair<int, glm::vec3>(index, tree[index].pos);
 }
 
+void mainBranch::noOrder()
+{
+    for (int i = 0; i < tree.size(); i++) {
+        vertices.push_back(tree[i].pos);
+        indices.push_back(std::make_pair(tree[i].mainBranch, tree[i].parentIndex));
+        indices.push_back(std::make_pair(tree[i].mainBranch, i));
+    }
+}
+
 void mainBranch::makeMap() {
     std::map<int, std::vector<int>>::iterator it;
     int pInd;
@@ -298,8 +307,6 @@ void mainBranch::makeIndexes() {
     }
 }
 
-
-
 void mainBranch::addVector(std::vector<node> vector) {
     tree.insert(tree.end(), vector.begin(), vector.end());
 }
@@ -326,7 +333,7 @@ std::pair<std::vector<unsigned int>, std::vector<unsigned int>> mainBranch::getI
     std::vector<unsigned int> branchi;
 
     for (int i = 0; i < size; i++) {
-        if (indices[i].first)
+        if (indices[i].first == 1)
             mBranchi.push_back(indices[i].second);
         else
             branchi.push_back(indices[i].second);

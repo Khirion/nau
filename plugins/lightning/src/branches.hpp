@@ -39,7 +39,7 @@ public:
         mainIndex(_mainIndex),
         weight(_weight),
         width(_width),
-        cplx(complexity * (0.75f/(_degree*2.f))),
+        cplx(complexity * (0.2f/(_degree*2.f))),
         killDistance(_growthLength),
         attDistance(2.f * _growthLength),
         growthLength(static_cast<float>(_growthLength))

@@ -238,11 +238,11 @@ PassLightning::iterateGeometry() {
 
 	// Branch
 	// create indices and fill the array
-	indices = std::make_shared<std::vector<unsigned int>>(auxb);
+	std::shared_ptr<std::vector<unsigned int>> bindices = std::make_shared<std::vector<unsigned int>>(auxb);
 
 	// Branch Indices
 	aMaterialGroup = m_Renderable->getMaterialGroups()[1];
-	aMaterialGroup->setIndexList(indices);
+	aMaterialGroup->setIndexList(bindices);
 	aMaterialGroup->resetCompilationFlag();
 
 	RENDERMANAGER->getScene("lightning")->recompile();
@@ -349,7 +349,9 @@ PassLightning::genBranches() {
 	glm::vec3 end;
 	std::pair<int, glm::vec3> startPoint;
 	std::vector<glm::vec3> mainTree;
+	float maxDist = glm::distance(waypoints.front(), waypoints.back());
 	float dist = 0.f;
+	float cplx = 0.f;
 
 	std::vector<std::pair<int, glm::vec3>> branchNodes = std::vector<std::pair<int, glm::vec3>>(0);
 	std::vector<std::pair<int, glm::vec3>> buffer = mBranch.getBranchNodes();
@@ -365,8 +367,8 @@ PassLightning::genBranches() {
 
 			dist = glm::distance(branchNodes[j].second, waypoints.back());
 
-			end = branchNodes[j].second + (glm::normalize(randVec(waypoints.back() - branchNodes[j].second, j)) * randDist(dist, i));
-			branch b = branch(m_FloatProps[Attribs.get("CPLX")->getId()],
+			end = branchNodes[j].second + (glm::normalize(randVec(waypoints.back() - branchNodes[j].second, dist / maxDist)) * randDist(dist, i));
+			branch b = branch(m_FloatProps[Attribs.get("SPLX")->getId()],
 				mBranch.getSize(),
 				m_FloatProps[Attribs.get("WEIGHT")->getId()],
 				m_FloatProps[Attribs.get("WIDTH")->getId()],
@@ -387,6 +389,7 @@ PassLightning::genBways() {
 	glm::vec3 end;
 	std::pair<int, glm::vec3> startPoint;
 	std::vector<glm::vec3> mainTree;
+	float maxDist = glm::distance(waypoints.front(), waypoints.back());
 	float dist = 0.f;
 
 	int cull = m_IntProps[Attribs.get("BRANCH")->getId()];
@@ -426,8 +429,8 @@ PassLightning::genBways() {
 
 			dist = glm::distance(branchNodes[j].second, waypoints.back());
 
-			end = branchNodes[j].second + (glm::normalize(randVec(waypoints.back() - branchNodes[j].second, j)) * randDist(dist, i));
-			branch b = branch(m_FloatProps[Attribs.get("CPLX")->getId()],
+			end = branchNodes[j].second + (glm::normalize(randVec(waypoints.back() - branchNodes[j].second, dist/maxDist)) * randDist(dist, i));
+			branch b = branch(m_FloatProps[Attribs.get("SPLX")->getId()],
 				mBranch.getSize(),
 				m_FloatProps[Attribs.get("WEIGHT")->getId()],
 				m_FloatProps[Attribs.get("WIDTH")->getId()],
@@ -443,15 +446,15 @@ PassLightning::genBways() {
 	}
 }
 
-glm::vec3 PassLightning::randVec(glm::vec3 vec, int i) {
+glm::vec3 PassLightning::randVec(glm::vec3 vec, float d) {
 	// Introduce jaggedness
-	static std::default_random_engine generator;
-	std::normal_distribution<float> randP(glm::radians(25.f), glm::radians(25.f)/3);
-	std::normal_distribution<float> randN(glm::radians(-25.f), glm::radians(25.f)/3);
+	static std::default_random_engine gen;
+	std::uniform_real_distribution<float> randZ(-(3* pi)/ 4, pi/6);
+	std::uniform_real_distribution<float> randY(0, 2*pi);
 
-	float angle = ((i % 2) ? randP(generator) : randN(generator));
+	
 
-	return glm::rotateZ(vec, angle);
+	return glm::rotateY(glm::rotateZ(vec, randZ(gen) * d), randY(gen));
 }
 
 float PassLightning::randDist(float dist, int i) {
@@ -459,7 +462,7 @@ float PassLightning::randDist(float dist, int i) {
 	std::uniform_real_distribution<float> randG(0.f, 1.f);
 	auto genR = bind(randG, generator);
 
-	return (i == 0 ? dist * genR() * pblen : (dist * (genR() / 4) * sblen));
+	return (i == 0 ? dist * genR() * pblen : (dist * (genR() * 0.25f) * sblen));
 }
 
 void

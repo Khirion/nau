@@ -3,8 +3,9 @@
 uniform vec4 emission;
 
 layout (location = 0) out vec4 scene;
+layout (location = 1) out vec4 mainColor;
 
 void main()
 {
-	scene = vec4(1.0, 0.0, 0.0, 1.0);
+	scene = mainColor = vec4(emission.rgb, 1.0);
 }
