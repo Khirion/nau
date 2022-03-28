@@ -15,5 +15,5 @@ void main() {
             result += texture(texUnit, texCoordV + vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
             result += texture(texUnit, texCoordV - vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
         }
-	imageStore(imageUnit, ivec2(texCoordV * 1325), vec4(result, 1.0));
+	imageStore(imageUnit, ivec2(texCoordV * 800), vec4(result, 1.0));
 } 

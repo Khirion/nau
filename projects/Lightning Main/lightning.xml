@@ -38,7 +38,7 @@
 		<lights>
 			<light name="Sun">
 				<DIRECTION x="-2" y="-1" z="-2" />
-				<COLOR r="0.1" g="0.1" b="0.1" />
+				<COLOR r="0.1" g="0.1" b="0.3" />
 			</light>
 		</lights>
 
@@ -83,18 +83,66 @@
 				</materialMaps>
 			</pass>
 
-			<pass class="quad" name="process2" >
+			<pass class="quad" name="blur1" >
 				<materialMaps>
 					<map fromMaterial="__Quad" toMaterial="hBlur" toLibrary="Lighting" />
 				</materialMaps>
 			</pass>
 
-			<pass class="quad" name="process2" >
+			<pass class="quad" name="blur1" >
 				<materialMaps>
 					<map fromMaterial="__Quad" toMaterial="vBlur" toLibrary="Lighting" />
 				</materialMaps>
 			</pass>
 
+			<pass class="quad" name="blur2" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="hBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="blur2" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="vBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="blur3" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="hBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="blur3" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="vBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="blur4" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="hBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="blur4" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="vBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="blur5" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="hBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="blur5" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="vBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+			
 			<pass class="quad" name="show" >
 				<viewport name="MainViewport" />
 				<camera name="MainCamera" />

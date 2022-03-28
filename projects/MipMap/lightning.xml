@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<project name="Lightning" width='1325' height='1325'>
+<project name="Lightning" width='800' height='800'>
 	<assets>
 		<attributes>			
-			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.6"/>
-			<attribute type="PASS" name="SPLX" data="FLOAT" value="0.5"/>
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.275"/>
+			<attribute type="PASS" name="SPLX" data="FLOAT" value="0.115"/>
 			<attribute type="PASS" name="BRANCH" data="INT" value="2"/>
 			<attribute type="PASS" name="GEN" data="INT" value="0"/>
 			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1"/>
@@ -73,11 +73,17 @@
 
 			<pass class="quad" name="process1" >
 				<materialMaps>
-					<map fromMaterial="__Quad" toMaterial="mainBlur" toLibrary="Lighting" />
+					<map fromMaterial="__Quad" toMaterial="dilation" toLibrary="Lighting" />
 				</materialMaps>
 			</pass>
 
 			<pass class="quad" name="process2" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="mainBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="process3" >
 				<materialMaps>
 					<map fromMaterial="__Quad" toMaterial="branchBlur" toLibrary="Lighting" />
 				</materialMaps>

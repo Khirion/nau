@@ -39,6 +39,8 @@
 										ps = "shaders/renderScene.frag" />
 		<shader name="mainColor" 		vs = "shaders/branchColor.vert" 
 										ps = "shaders/mainColor.frag" />
+		<shader name="dilation" 		vs = "shaders/blur.vert" 
+										ps = "shaders/dilation.frag" />
 		<shader name="mainBlur" 		vs = "shaders/blur.vert" 
 										ps = "shaders/mainBlur.frag" />
 		<shader name="branchBlur" 		vs = "shaders/blur.vert" 
@@ -106,14 +108,17 @@
 		</material>
 
 		<material name ="mainBlur">
-			<shader name="mainBlur">
+			<shader name="dilation">
 				<values>									
 					<valueof uniform="texUnit"		
 							 type="TEXTURE_BINDING" context="CURRENT"
 							 id=0 component="UNIT" />		
-					<valueof uniform="imageUnit"	
+					<valueof uniform="mainBlur"	
 							 type="IMAGE_TEXTURE" context="CURRENT"
 							 id=1 component="UNIT" />
+					<valueof uniform="vBlur"	
+							 type="IMAGE_TEXTURE" context="CURRENT"
+							 id=2 component="UNIT" />
 				</values>
 			</shader>
 			<textures>
@@ -121,6 +126,10 @@
 			</textures>	
 			<imageTextures>
 				<imageTexture UNIT=1 texture="mainBlur" >
+					<ACCESS value="WRITE_ONLY" />
+					<LEVEL value=0 />
+				</imageTexture>
+				<imageTexture UNIT=2 texture="vBlur" >
 					<ACCESS value="WRITE_ONLY" />
 					<LEVEL value=0 />
 				</imageTexture>
@@ -161,7 +170,7 @@
 				</values>
 			</shader>
 			<textures>
-				<texture UNIT=0 name="mainBlur" />
+				<texture UNIT=0 name="vBlur" />
 			</textures>	
 			<imageTextures>
 				<imageTexture UNIT=1 texture="hBlur" >

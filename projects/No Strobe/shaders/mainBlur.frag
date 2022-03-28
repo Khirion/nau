@@ -1,6 +1,7 @@
 #version 440
 
-uniform writeonly image2D imageUnit;
+uniform writeonly image2D mainBlur;
+uniform writeonly image2D vBlur;
 uniform sampler2D texUnit;
 
 in vec2 texCoordV;
@@ -16,5 +17,7 @@ void main() {
                 result += texture(texUnit, texCoordV + vec2(tex_offset.x * i, tex_offset.y * k)).rgb * weight[abs(i)] * weight[abs(k)];
         }
     }
-	imageStore(imageUnit, ivec2(texCoordV * 1325), vec4(result * 2, 1.0));
+    
+	imageStore(mainBlur, ivec2(texCoordV * 1325), vec4(result, 1.0));
+    imageStore(vBlur, ivec2(texCoordV * 1325), vec4(result, 1.0));
 } 

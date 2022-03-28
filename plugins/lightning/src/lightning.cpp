@@ -367,7 +367,7 @@ PassLightning::genBranches() {
 
 			dist = glm::distance(branchNodes[j].second, waypoints.back());
 
-			end = branchNodes[j].second + (glm::normalize(randVec(waypoints.back() - branchNodes[j].second, dist / maxDist)) * randDist(dist, i));
+			end = branchNodes[j].second + (glm::normalize(randVec(glm::normalize(waypoints.back() - branchNodes[j].second), dist / maxDist)) * randDist(dist, i));
 			branch b = branch(m_FloatProps[Attribs.get("SPLX")->getId()],
 				mBranch.getSize(),
 				m_FloatProps[Attribs.get("WEIGHT")->getId()],
@@ -429,7 +429,7 @@ PassLightning::genBways() {
 
 			dist = glm::distance(branchNodes[j].second, waypoints.back());
 
-			end = branchNodes[j].second + (glm::normalize(randVec(waypoints.back() - branchNodes[j].second, dist/maxDist)) * randDist(dist, i));
+			end = branchNodes[j].second + (glm::normalize(randVec(glm::normalize(waypoints.back() - branchNodes[j].second), dist/maxDist)) * randDist(dist, i));
 			branch b = branch(m_FloatProps[Attribs.get("SPLX")->getId()],
 				mBranch.getSize(),
 				m_FloatProps[Attribs.get("WEIGHT")->getId()],
