@@ -259,14 +259,14 @@
 				<texture UNIT=1 name="branchColor" />
 				<texture UNIT=2 name="mainBlur" />
 				<texture UNIT=3 name="branchBlur" >
-					<MIN_FILTER value="NEAREST_MIPMAP_NEAREST" />
-					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+					<MAG_FILTER value="LINEAR" />
 					<WRAP_S value="CLAMP_TO_BORDER" />
 					<WRAP_T value="CLAMP_TO_BORDER" />
 				</texture>
 				<texture UNIT=4 name="vBlur" >
-					<MIN_FILTER value="NEAREST_MIPMAP_NEAREST" />
-					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+					<MAG_FILTER value="LINEAR" />
 					<WRAP_S value="CLAMP_TO_BORDER" />
 					<WRAP_T value="CLAMP_TO_BORDER" />
 				</texture>

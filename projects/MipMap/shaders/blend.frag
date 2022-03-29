@@ -20,6 +20,6 @@ void main() {
     if (control == 0)
         outColor = vec4(max(texture(mainColor,texCoordV).rgb, texture(branchColor, texCoordV).rgb * 0.5), 1.0);
     else{
-        outColor = vec4(max((texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb), 1.0) * 2;
+        outColor = vec4(max((textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)+ texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb), 1.0) * 2;
     }
 }

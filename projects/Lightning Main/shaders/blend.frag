@@ -25,27 +25,27 @@ void main() {
         
         case 1:
             f *= 3;
-            outColor = vec4(max((texture(blur,texCoordV).rgb + texture(mainBlur,texCoordV).rgb)*2, texture(branchBlur, texCoordV).rgb) * (1-f), 1.0);
+            outColor = vec4(max((textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)+ texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb) * (1-f), 1.0);
             break;
         
         case 2:
             f *= 3;
-            outColor = vec4(max((texture(blur,texCoordV).rgb + texture(mainBlur,texCoordV).rgb)*2, texture(branchBlur, texCoordV).rgb) * (f+0.4), 1.0);
+            outColor = vec4(max((textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)+ texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb) * (f+0.4), 1.0);
             break;
         
         case 3:
             f *= 3;
-            outColor = vec4(max((texture(blur,texCoordV).rgb + texture(mainBlur,texCoordV).rgb)*2, texture(branchBlur, texCoordV).rgb) * (1-f), 1.0);
+            outColor = vec4(max((textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)+ texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb) * (1-f), 1.0);
             break;
         
         case 4:
             f *= 3;
-            outColor = vec4(max((texture(blur,texCoordV).rgb + texture(mainBlur,texCoordV).rgb)*2, texture(branchBlur, texCoordV).rgb) * (f+0.4), 1.0);
+            outColor = vec4(max((textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)+ texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb) * (f+0.4), 1.0);
             break;
             
         case 5:
             f *= 5;
-            outColor = vec4(max((texture(blur,texCoordV).rgb + texture(mainBlur,texCoordV).rgb)*2, texture(branchBlur, texCoordV).rgb) * (1-(f*5)), 1.0);
+            outColor = vec4(max((textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)+ texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb) * (1-(f*5)), 1.0);
             break;
     };
 
