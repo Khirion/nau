@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
-<project name="Lightning" width='1325' height='1325'>
+<project name="Lightning" width='800' height='800'>
 	<assets>
 		<attributes>			
 			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.275"/>
 			<attribute type="PASS" name="SPLX" data="FLOAT" value="0.115"/>
-			<attribute type="PASS" name="BRANCH" data="INT" value="1"/>
+			<attribute type="PASS" name="BRANCH" data="INT" value="2"/>
 			<attribute type="PASS" name="GEN" data="INT" value="0"/>
 			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1"/>
 			<attribute type="PASS" name="WEIGHT" data="FLOAT" value="0.560"/>
 			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="10" />
 			<attribute type="PASS" name="PBLENGTH" data="FLOAT" value="0.5" />
-			<attribute type="PASS" name="SBLENGTH" data="FLOAT" value="1.0" />
+			<attribute type="PASS" name="SBLENGTH" data="FLOAT" value="0.5" />
 			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
 			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
 			<attribute type="PASS" name="TIMECOEF" data="FLOAT" value="1.0" />
@@ -38,7 +38,7 @@
 		<lights>
 			<light name="Sun">
 				<DIRECTION x="-2" y="-1" z="-2" />
-				<COLOR r="0.1" g="0.1" b="0.3" />
+				<COLOR r="0.1" g="0.1" b="0.1" />
 			</light>
 		</lights>
 
@@ -73,11 +73,17 @@
 
 			<pass class="quad" name="process1" >
 				<materialMaps>
-					<map fromMaterial="__Quad" toMaterial="mainBlur" toLibrary="Lighting" />
+					<map fromMaterial="__Quad" toMaterial="dilation" toLibrary="Lighting" />
 				</materialMaps>
 			</pass>
 
 			<pass class="quad" name="process2" >
+				<materialMaps>
+					<map fromMaterial="__Quad" toMaterial="mainBlur" toLibrary="Lighting" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="process3" >
 				<materialMaps>
 					<map fromMaterial="__Quad" toMaterial="branchBlur" toLibrary="Lighting" />
 				</materialMaps>
@@ -94,7 +100,7 @@
 					<map fromMaterial="__Quad" toMaterial="vBlur" toLibrary="Lighting" />
 				</materialMaps>
 			</pass>
-
+			
 			<pass class="quad" name="blur2" >
 				<materialMaps>
 					<map fromMaterial="__Quad" toMaterial="hBlur" toLibrary="Lighting" />
@@ -143,12 +149,16 @@
 				</materialMaps>
 			</pass>
 			
+
 			<pass class="quad" name="show" >
 				<viewport name="MainViewport" />
 				<camera name="MainCamera" />
 				<lights>
 					<light name="Sun" />
 				</lights>
+				<preProcess>
+					<texture name= "vBlur" fromLibrary="Lighting" MIPMAP=true />
+				</preProcess>
 				<materialMaps>
 					<map fromMaterial="*" toMaterial="blend" toLibrary="Lighting" />
 				</materialMaps>
@@ -167,7 +177,7 @@
 			<var label="Length of Secondary Branches" type="PASS" context="lightning#lightning" component="PBLENGTH" def="min=0 max=1 step=0.1"/>
 			<var label="Length of Tertiary Branches" type="PASS" context="lightning#lightning" component="SBLENGTH" def="min=0 max=1 step=0.1"/>
 			<var label="Influence of Weighted Direction" type="PASS" context="lightning#lightning" component="WEIGHT" def="min=0.1 max=1.0 step=0.1"/>
-			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=5 step=0.250"/>
+			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=8 step=0.5"/>
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
 		</window>
     </interface>

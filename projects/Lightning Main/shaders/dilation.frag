@@ -1,7 +1,6 @@
 #version 440
 
 uniform writeonly image2D mainBlur;
-uniform writeonly image2D vBlur;
 uniform sampler2D texUnit;
 
 in vec2 texCoordV;
@@ -16,6 +15,5 @@ void main() {
         }
     }
 
-	imageStore(mainBlur, ivec2(texCoordV * 1325), vec4(result, 1.0));
-    imageStore(vBlur, ivec2(texCoordV * 1325), vec4(result, 1.0));
+	imageStore(mainBlur, ivec2(texCoordV * 800), vec4(result, 1.0));
 } 

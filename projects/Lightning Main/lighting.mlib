@@ -2,7 +2,7 @@
 <materialLib name="Lighting">
 	<renderTargets>
 		<renderTarget name="sceneTarget" >
-			<SIZE width=1325 height=1325 />
+			<SIZE width=800 height=800 />
 			<colors>
 				<color name ="scene" internalFormat="RGBA" />
 				<color name ="mainColor" internalFormat="RGBA" />
@@ -13,24 +13,25 @@
 
 	<textures>
 		<texture name="mainBlur">
-			<WIDTH value=1325 />
-			<HEIGHT value=1325 />
+			<WIDTH value=800 />
+			<HEIGHT value=800 />
 			<INTERNAL_FORMAT value="RGBA" />
 		</texture>
 		<texture name="branchBlur">
-			<WIDTH value=1325 />
-			<HEIGHT value=1325 />
+			<WIDTH value=800 />
+			<HEIGHT value=800 />
 			<INTERNAL_FORMAT value="RGBA" />
 		</texture>
 		<texture name="hBlur">
-			<WIDTH value=1325 />
-			<HEIGHT value=1325 />
+			<WIDTH value=800 />
+			<HEIGHT value=800 />
 			<INTERNAL_FORMAT value="RGBA" />
 		</texture>
 		<texture name="vBlur">
-			<WIDTH value=1325 />
-			<HEIGHT value=1325 />
+			<WIDTH value=800 />
+			<HEIGHT value=800 />
 			<INTERNAL_FORMAT value="RGBA" />
+			<MIPMAP value=true />
 		</texture>
 	</textures>
 
@@ -107,8 +108,30 @@
 			</shader>
 		</material>
 
-		<material name ="mainBlur">
+		<material name ="dilation">
 			<shader name="dilation">
+				<values>									
+					<valueof uniform="texUnit"		
+							 type="TEXTURE_BINDING" context="CURRENT"
+							 id=0 component="UNIT" />		
+					<valueof uniform="mainBlur"	
+							 type="IMAGE_TEXTURE" context="CURRENT"
+							 id=1 component="UNIT" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="mainColor" />
+			</textures>	
+			<imageTextures>
+				<imageTexture UNIT=1 texture="hBlur" >
+					<ACCESS value="WRITE_ONLY" />
+					<LEVEL value=0 />
+				</imageTexture>
+			</imageTextures>
+		</material>
+
+		<material name ="mainBlur">
+			<shader name="mainBlur">
 				<values>									
 					<valueof uniform="texUnit"		
 							 type="TEXTURE_BINDING" context="CURRENT"
@@ -122,7 +145,7 @@
 				</values>
 			</shader>
 			<textures>
-				<texture UNIT=0 name="mainColor" />
+				<texture UNIT=0 name="hBlur" />
 			</textures>	
 			<imageTextures>
 				<imageTexture UNIT=1 texture="mainBlur" >
@@ -228,19 +251,25 @@
 							 component="TIMECOEF" />
 					<valueof uniform="control" 
 							 type="PASS" context="lightning#lightning" 
-							 component="CONTROL" />
-					<valueof uniform="scene"		
-							 type="TEXTURE_BINDING" context="CURRENT"
-							 id=5 component="UNIT" />
+							 component="CONTROL" />	
 				</values>
 			</shader>
 			<textures>
 				<texture UNIT=0 name="mainColor" />
 				<texture UNIT=1 name="branchColor" />
 				<texture UNIT=2 name="mainBlur" />
-				<texture UNIT=3 name="branchBlur" />
-				<texture UNIT=4 name="vBlur" />
-				<texture UNIT=5 name="scene" />
+				<texture UNIT=3 name="branchBlur" >
+					<MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+					<MAG_FILTER value="LINEAR" />
+					<WRAP_S value="CLAMP_TO_BORDER" />
+					<WRAP_T value="CLAMP_TO_BORDER" />
+				</texture>
+				<texture UNIT=4 name="vBlur" >
+					<MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+					<MAG_FILTER value="LINEAR" />
+					<WRAP_S value="CLAMP_TO_BORDER" />
+					<WRAP_T value="CLAMP_TO_BORDER" />
+				</texture>
 			</textures>	
 		</material>
 	</materials>

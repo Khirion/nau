@@ -45,7 +45,7 @@ void main() {
             
         case 5:
             f *= 5;
-            outColor = vec4(max((textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)+ texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2), texture(branchBlur, texCoordV).rgb) * (1-(f*5)), 1.0);
+            outColor = vec4((max( texture(blur,texCoordV).rgb * 1.5 + texture(mainBlur,texCoordV).rgb * 2, texture(branchBlur, texCoordV).rgb) + textureLod(blur, texCoordV, 8).rgb * 7 * vec3(0.0, 0.35, 0.73)) * (1-(f*5)), 1.0);
             break;
     };
 
