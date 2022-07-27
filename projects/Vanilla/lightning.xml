@@ -2,15 +2,15 @@
 <project name="Lightning" width='800' height='800'>
 	<assets>
 		<attributes>			
-			<attribute type="PASS" name="CPLX" data="FLOAT" value="0"/>
-			<attribute type="PASS" name="SPLX" data="FLOAT" value="0"/>
-			<attribute type="PASS" name="BRANCH" data="INT" value="0"/>
+			<attribute type="PASS" name="CPLX" data="FLOAT" value="0.145"/>
+			<attribute type="PASS" name="SPLX" data="FLOAT" value="0.115"/>
+			<attribute type="PASS" name="BRANCH" data="INT" value="2"/>
 			<attribute type="PASS" name="GEN" data="INT" value="0"/>
 			<attribute type="PASS" name="WIDTH" data="FLOAT" value="1"/>
-			<attribute type="PASS" name="WEIGHT" data="FLOAT" value="0.500"/>
+			<attribute type="PASS" name="WEIGHT" data="FLOAT" value="0.600"/>
 			<attribute type="PASS" name="GROWTH_LENGTH" data="INT" value="10" />
-			<attribute type="PASS" name="PBLENGTH" data="FLOAT" value="0.5" />
-			<attribute type="PASS" name="SBLENGTH" data="FLOAT" value="0.5" />
+			<attribute type="PASS" name="PBLENGTH" data="FLOAT" value="1.0" />
+			<attribute type="PASS" name="SBLENGTH" data="FLOAT" value="1.0" />
 			<attribute type="PASS" name="RESTART" data="BOOL" value="false"/>
 			<attribute type="PASS" name="TIME" data="FLOAT" value="0.0"/>
 			<attribute type="PASS" name="TIMECOEF" data="FLOAT" value="1.0" />

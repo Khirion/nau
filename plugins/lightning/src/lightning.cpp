@@ -449,7 +449,7 @@ PassLightning::genBways() {
 glm::vec3 PassLightning::randVec(glm::vec3 vec, float d) {
 	// Introduce jaggedness
 	static std::default_random_engine gen;
-	std::uniform_real_distribution<float> randZ(-(3* pi)/ 4, pi/6);
+	std::uniform_real_distribution<float> randZ(0, (4*pi)/5);
 	std::uniform_real_distribution<float> randY(0, 2*pi);
 
 	

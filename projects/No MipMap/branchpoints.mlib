@@ -1,15 +1,15 @@
 <?xml version="1.0" ?>
-<materialLib name="Waypoints">
+<materialLib name="Branchpoints">
 	
 	<buffers>
-		<buffer name="waypoints">
-			<DIM x=8 y=1 z=1/>
+		<buffer name="branchpoints">
+			<DIM x=0 y=1 z=1/>
 			<structure>
 				<field value="FLOAT" />
 				<field value="FLOAT" />
 				<field value="FLOAT" />
 			</structure>
-			<file name="waypoints.txt" />
+			<file name="branchpoints.txt" />
 		</buffer>
 	</buffers>
 </materialLib>
