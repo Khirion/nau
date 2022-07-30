@@ -19,7 +19,7 @@ void mainBranch::init(std::vector<glm::vec3> waypoints, int gen){
 
             tree.push_back(node(tempp.first, root, glm::normalize(end - root), true));
 
-            charges.push_front(end);
+            charges.push_back(end);
             genCharges(gen);
             grow();
         }
@@ -66,7 +66,7 @@ void mainBranch::genCyl(glm::vec3 center, glm::mat3 transform, float height, flo
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 250 * height; i++) {
+    for (int i = 0; i < 100 * height; i++) {
         y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
@@ -93,7 +93,7 @@ void mainBranch::genCone(glm::vec3 center, glm::mat3 transform, float height, fl
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 250 * height; i++) {
+    for (int i = 0; i < 100 * height; i++) {
         y = biModal();
         radius = sqrt(genR()) * maxRad * (y); // Random radius element * maximum radius for the disc * linear decrease
         angle = genR() * 2 * pi;
@@ -110,7 +110,7 @@ void mainBranch::genSphere(glm::vec3 center, glm::mat3 transform, float height) 
     float phi = 0.f;
     float theta = 0.f;
 
-    for (int i = 0; i < 250 * height; i++) {
+    for (int i = 0; i < 100 * height; i++) {
         dist = (0.5 - biModal()) * height; // Random radius element * maximum radius for the disc
         theta = genR() * 2 * pi;
         phi = genR() * pi;
@@ -142,7 +142,7 @@ void mainBranch::grow() {
 
         // Scol Growth
         if(atts)
-            newPos = curNode.pos + (glm::normalize((curNode.dir * (1.f-weight)) + (curNode.weightDir * weight)) * growthLength);
+            newPos = curNode.pos + (glm::normalize((curNode.dir * (1.f - weight)) + (curNode.weightDir * weight)) * growthLength);
         //16 degree random growth
         else
             newPos = curNode.pos + (glm::normalize(randdir(curNode.weightDir * (1.f - weight)) + (curNode.weightDir * weight)) * growthLength);
@@ -162,9 +162,9 @@ glm::vec3 mainBranch::randdir(glm::vec3 vec) {
     bool flag = d(gen);
 
     if (flag)
-        vec = glm::rotateX(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
+        vec = glm::rotateX(vec, (d(gen) ? glm::radians(32.f) : glm::radians(-32.f)));
     else
-        vec = glm::rotateZ(vec, (d(gen) ? glm::radians(16.f) : glm::radians(-16.f)));
+        vec = glm::rotateZ(vec, (d(gen) ? glm::radians(32.f) : glm::radians(-32.f)));
     return vec;
 }
 

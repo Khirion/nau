@@ -52,7 +52,7 @@ void branch::genCyl(glm::vec3 center, glm::mat3 transform, float height, float m
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 250 * height; i++) {
+    for (int i = 0; i < 100 * height; i++) {
         y = biModal() * height;
         radius = sqrt(genR()) * maxRad; // Random radius element * maximum radius for the disc
         angle = genR() * 2 * pi;
@@ -79,7 +79,7 @@ void branch::genCone(glm::vec3 center, glm::mat3 transform, float height, float 
     float radius = 0.f;
     float angle = 0.f;
 
-    for (int i = 0; i < 250 * height; i++) {
+    for (int i = 0; i < 100 * height; i++) {
         y = biModal();
         radius = sqrt(genR()) * maxRad * (y); // Random radius element * maximum radius for the disc * linear decrease
         angle = genR() * 2 * pi;
@@ -96,7 +96,7 @@ void branch::genSphere(glm::vec3 center, glm::mat3 transform, float height) {
     float phi = 0.f;
     float theta = 0.f;
 
-    for (int i = 0; i < 250 * height; i++) {
+    for (int i = 0; i < 100 * height; i++) {
         dist = (0.5 - biModal()) * height; // Random radius element * maximum radius for the disc
         theta = genR() * 2 * pi;
         phi = genR() * pi;

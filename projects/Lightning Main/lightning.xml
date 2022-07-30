@@ -176,7 +176,7 @@
 			<var label="Distance between Nodes" type="PASS" context="lightning#lightning" component="GROWTH_LENGTH"/>
 			<var label="Length of Secondary Branches" type="PASS" context="lightning#lightning" component="PBLENGTH" def="min=0 max=1 step=0.1"/>
 			<var label="Length of Tertiary Branches" type="PASS" context="lightning#lightning" component="SBLENGTH" def="min=0 max=1 step=0.1"/>
-			<var label="Influence of Weighted Direction" type="PASS" context="lightning#lightning" component="WEIGHT" def="min=0.1 max=1.0 step=0.1"/>
+			<var label="Influence of Weighted Direction" type="PASS" context="lightning#lightning" component="WEIGHT" def="min=0.520 max=1.0 step=0.05"/>
 			<var label="Time Coefficient" type="PASS" context="lightning#lightning" component="TIMECOEF" def="min=0.01 max=10 step=0.5"/>
 			<var label="Restart" type="PASS" context="lightning#lightning" component="RESTART"/>
 		</window>
